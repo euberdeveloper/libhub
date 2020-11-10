@@ -1,0 +1,9 @@
+language : node_js
+node_js:
+ - node
+os:
+ - linux
+install:
+ - npm install
+script:
+ - npm run lint

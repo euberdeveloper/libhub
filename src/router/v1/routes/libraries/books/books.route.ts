@@ -45,5 +45,25 @@ export function route(router: Router): void {
         });
     });
  
+    router.get("/libraries/:lid/books/:bid", validateDbId(['lid', 'bid']), async (req: Request & ReqIdParams, res) => {
+        await aceInTheHole(res, async () => {
+            const { lid, bid } = req.idParams;
+            
+            const book = await dbQuery<ApiGetLibrariesLidBooksBid>(async db => {
+                return db.collection(DBCollections.BOOKS).findOne({ _id: bid, libraryId: lid.toHexString() });
+            });
+
+            if (!book) {
+                const err: ApiError = {
+                    message: 'Book not found',
+                    code: ApiErrorCode.PROVIDED_ID_NOT_FOUND
+                };
+                res.status(404).send(err);
+                return;
+            }
+
+            res.send(book);
+        });
+    });
    
 }

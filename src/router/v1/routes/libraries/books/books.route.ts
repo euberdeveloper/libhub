@@ -98,4 +98,44 @@ export function route(router: Router): void {
         });
     });
 
+    router.post('/libraries/:lid/books/:bid/pictures', upload(CONFIG.UPLOAD.TEMP_LOCATIONS.LIBRARIES_BOOKS, 'picture'), validateDbId(['lid', 'bid']), async (req: Request & ReqIdParams, res) => {
+        await aceInTheHole(res, async () => {
+            const { lid, bid } = req.idParams;
+            const found = await dbQuery<boolean>(async db => {
+                const book = await db.collection(DBCollections.BOOKS).countDocuments({ _id: bid, libraryId: lid.toHexString() });
+                return book > 0;
+            });
+
+            if (!found) {
+                const err: ApiError = {
+                    message: 'Book not found',
+                    code: ApiErrorCode.PROVIDED_ID_NOT_FOUND
+                };
+                res.status(404).send(err);
+                return;
+            }
+            
+            const fileName = await dbTransaction<string>(async (db, session) => {
+                const pictureId = uuid();
+                const pictureName = `${pictureId}.jpg`;
+                const picturePath = path.join(CONFIG.UPLOAD.STORED_LOCATIONS.LIBRARIES_BOOKS(lid.toHexString(), bid.toHexString()), pictureName);
+
+                const queryBody = { $push: { pictures: pictureName } };
+                const queryResult = await db.collection(DBCollections.BOOKS).updateOne({ _id: bid, libraryId: lid.toHexString() }, queryBody, { session });
+
+                if (queryResult.matchedCount < 1) {
+                    throw new Error('Error in updating book');
+                }
+
+                const tempPath = req.file.path;
+                await mkdir(CONFIG.UPLOAD.STORED_LOCATIONS.LIBRARIES_BOOKS(lid.toHexString(), bid.toHexString()), { recursive: true });
+                await rename(tempPath, picturePath);
+
+                return pictureName;
+            });
+
+            res.send(fileName);
+        });
+    });
+
 }

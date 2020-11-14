@@ -44,11 +44,11 @@ export function route(router: Router): void {
             res.send(books as ApiGetLibrariesLidBooks);
         });
     });
- 
+
     router.get('/libraries/:lid/books/:bid', validateDbId(['lid', 'bid']), async (req: Request & ReqIdParams, res) => {
         await aceInTheHole(res, async () => {
             const { lid, bid } = req.idParams;
-            
+
             const book = await dbQuery<ApiGetLibrariesLidBooksBid>(async db => {
                 return db.collection(DBCollections.BOOKS).findOne({ _id: bid, libraryId: lid.toHexString() });
             });
@@ -65,5 +65,37 @@ export function route(router: Router): void {
             res.send(book);
         });
     });
-   
+
+    router.post('/libraries/:lid/books', validateDbId('lid'), deserializeDates(['publicationYear']), validate(validatePostOrPutBooks), purge(purgePostBooks), async (req: Request & ReqIdParams, res) => {
+        await aceInTheHole(res, async () => {
+            const lid = req.idParams.lid;
+
+            const found = await dbQuery<boolean>(async db => {
+                const library = await db.collection(DBCollections.LIBRARIES).countDocuments({ _id: lid });
+                return library > 0;
+            });
+            if (!found) {
+                const err: ApiError = {
+                    message: 'Library not found',
+                    code: ApiErrorCode.PROVIDED_ID_NOT_FOUND
+                };
+                res.status(404).send(err);
+                return;
+            }
+
+            const body: ApiPostLibrariesLidBooksBody = req.body;
+            const bid = await dbQuery<ApiPostLibrariesLidBooksResult>(async db => {
+                const book: Omit<DBBookDocument, '_id'> = { ...body, libraryId: lid.toHexString() };
+                const queryResult = await db.collection(DBCollections.BOOKS).insertOne(book);
+                return queryResult?.insertedId?.toHexString();
+            });
+
+            if (!bid) {
+                throw new Error('Error in database insert');
+            }
+
+            res.send(bid);
+        });
+    });
+
 }

@@ -45,7 +45,7 @@ export function route(router: Router): void {
         });
     });
  
-    router.get("/libraries/:lid/books/:bid", validateDbId(['lid', 'bid']), async (req: Request & ReqIdParams, res) => {
+    router.get('/libraries/:lid/books/:bid', validateDbId(['lid', 'bid']), async (req: Request & ReqIdParams, res) => {
         await aceInTheHole(res, async () => {
             const { lid, bid } = req.idParams;
             

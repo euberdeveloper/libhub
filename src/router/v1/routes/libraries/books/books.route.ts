@@ -227,4 +227,36 @@ export function route(router: Router): void {
         });
     });
 
+    router.delete('/libraries/:lid/books/:bid/pictures/:picture', validateDbId(['lid', 'bid']), async (req: Request & ReqIdParams, res) => {
+        await aceInTheHole(res, async () => {
+            const { lid, bid } = req.idParams;
+            const picture = req.params.picture;
+
+            const found = await dbQuery<boolean>(async db => {
+                const book = await db.collection(DBCollections.BOOKS).countDocuments({ _id: bid, libraryId: lid.toHexString() });
+                return book > 0;
+            });
+            if (!found) {
+                const err: ApiError = {
+                    message: 'Book not found',
+                    code: ApiErrorCode.PROVIDED_ID_NOT_FOUND
+                };
+                res.status(404).send(err);
+                return;
+            }
+
+            await dbTransaction<void>(async (db, session) => {
+                const queryResult = await db.collection(DBCollections.BOOKS).updateOne({ _id: bid, libraryId: lid.toHexString() }, { $pull: { pictures: picture } }, { session });
+                if(queryResult.modifiedCount < 1) {
+                    throw new Error('Error in updating book');
+                }
+
+                const picturePath = path.join(CONFIG.UPLOAD.STORED_LOCATIONS.LIBRARIES_BOOKS(lid.toHexString(), bid.toHexString()), picture);
+                await unlink(picturePath);
+            });
+
+            res.send();
+        });
+    });
+
 }

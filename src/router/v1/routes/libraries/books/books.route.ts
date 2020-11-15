@@ -224,7 +224,6 @@ export function route(router: Router): void {
             });
 
             res.send();
-        });xxxx
     });
 
     router.delete('/libraries/:lid/books/:bid/pictures/:picture', validateDbId(['lid', 'bid']), async (req: Request & ReqIdParams, res) => {

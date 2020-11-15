@@ -168,7 +168,7 @@ export function route(router: Router): void {
 
     router.patch('/libraries/:lid/books/:bid', validateDbId(['lid', 'bid']), deserializeDates(['publicationYear']), validate(validatePatchBooks), purge(purgePatchBooks), async (req: Request & ReqIdParams, res) => {
         await aceInTheHole(res, async () => {
-            constttt { lid, bid } = req.idParams;
+            const { lid, bid } = req.idParams;
             const body: ApiPatchLibrariesLidBooksBidBody = req.body;
 
             const updated = await dbQuery<boolean>(async db => {

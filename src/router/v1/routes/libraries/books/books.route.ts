@@ -166,4 +166,27 @@ export function route(router: Router): void {
         });
     });
 
+    router.patch('/libraries/:lid/books/:bid', validateDbId(['lid', 'bid']), deserializeDates(['publicationYear']), validate(validatePatchBooks), purge(purgePatchBooks), async (req: Request & ReqIdParams, res) => {
+        await aceInTheHole(res, async () => {
+            constttt { lid, bid } = req.idParams;
+            const body: ApiPatchLibrariesLidBooksBidBody = req.body;
+
+            const updated = await dbQuery<boolean>(async db => {
+                const result = await db.collection(DBCollections.BOOKS).updateOne({ _id: bid, libraryId: lid.toHexString() }, { $set: body }, { upsert: false });
+                return result.matchedCount > 0;
+            });
+
+            if (!updated) {
+                const err: ApiError = {
+                    message: 'Book not found',
+                    code: ApiErrorCode.PROVIDED_ID_NOT_FOUND
+                };
+                res.status(404).send(err);
+                return;
+            }
+
+            res.send();
+        });
+    });
+
 }

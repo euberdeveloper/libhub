@@ -189,4 +189,42 @@ export function route(router: Router): void {
         });
     });
 
+    router.delete('/libraries/:lid/books/:bid', validateDbId(['lid', 'bid']), async (req: Request & ReqIdParams, res) => {
+        await aceInTheHole(res, async () => {
+            const { lid, bid } = req.idParams;
+            const found = await dbQuery<boolean>(async db => {
+                const book = await db.collection(DBCollections.BOOKS).countDocuments({ _id: bid, libraryId: lid.toHexString() });
+                return book > 0;
+            });
+            if (!found) {
+                const err: ApiError = {
+                    message: 'Book not found',
+                    code: ApiErrorCode.PROVIDED_ID_NOT_FOUND
+                };
+                res.status(404).send(err);
+                return;
+            }
+
+            await dbTransaction<void>(async (db, session) => {
+                const queryResult = await db.collection(DBCollections.BOOKS).findOneAndDelete({ _id: bid, libraryId: lid.toHexString() }, { session });
+                const book: DBBookDocument = queryResult.value;
+
+                if(!book) {
+                    throw new Error('Error in deleting book');
+                }
+
+                for (const pictureName of book.pictures) {
+                    const picturePath = path.join(CONFIG.UPLOAD.STORED_LOCATIONS.LIBRARIES_BOOKS(lid.toHexString(), bid.toHexString()), pictureName);
+                    if (await exists(picturePath)) {
+                        await unlink(picturePath);
+                    }
+                }
+
+
+            });
+
+            res.send();
+        });
+    });
+
 }

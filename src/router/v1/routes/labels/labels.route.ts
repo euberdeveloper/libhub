@@ -74,6 +74,29 @@ export function route(router: Router): void {
         });
     });
 
+    router.patch('/labels/:lid', validateDbId('lid'), validate(validatePatchLabels), purge(purgePatchLabels), async (req: Request & ReqIdParams, res) => {
+        await aceInTheHole(res, async () => {
+            const lid = req.idParams.lid;
+            const body: ApiPatchLabelsLidBody = req.body;
+
+            const updated = await dbQuery<boolean>(async db => {
+                const result = await db.collection(DBCollections.LABELS).updateOne({ _id: lid }, { $set: body }, { upsert: false });
+                return result.matchedCount > 0;
+            });
+
+            if (!updated) {
+                const err: ApiError = {
+                    message: 'Label not found',
+                    code: ApiErrorCode.PROVIDED_ID_NOT_FOUND
+                };
+                res.status(404).send(err);
+                return;
+            }
+
+            res.send();
+        });
+    });
+
 
 
 }

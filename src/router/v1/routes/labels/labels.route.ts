@@ -97,6 +97,103 @@ export function route(router: Router): void {
         });
     });
 
+    router.post('/labels/parent/:parent/child/:child', validateDbId(['parent', 'child'], 'parent'), async (req: Request & ReqIdParams, res) => {
+        await aceInTheHole(res, async () => {
+            const parentId = req.idParams.parent;
+            const childId = req.idParams.child;
+            const parentIsRoot = (parentId as unknown as string) === 'root';
+
+            const { parentDiscendantOfChild, childNotFound, parentNotFound } = await dbTransaction<any>(async (db, session) => {
+                const child: DBLabelDocument = await db.collection(DBCollections.LABELS).findOne({ _id: childId }, { session });
+
+                if (!child) {
+                    return { childNotFound: true };
+                }
+
+                async function isNewParentADescendantOfChild(currentLabel: DBLabelDocument): Promise<boolean> {
+                    const children: string[]  = currentLabel.children;
+
+                    for (const child of children) {
+                        if (child === parentId.toHexString()) {
+                            return true;
+                        }
+
+                        const childLabel = await db.collection(DBCollections.LABELS).findOne({ _id: child }, { session });
+
+                        if (!childLabel) {
+                            throw new Error('Error in checking if parent is a descendant of child');
+                        }
+
+                        if (await isNewParentADescendantOfChild(childLabel)) {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
+                if (!parentIsRoot && await isNewParentADescendantOfChild(child)) {
+                    return { parentDiscendantOfChild: true };
+                }
+
+                const parent: DBLabelDocument | null = parentIsRoot
+                    ? null
+                    : await db.collection(DBCollections.LABELS).findOne({ _id: parentId }, { session });
+
+                if (!parentIsRoot && !parent) {
+                    return { parentNotFound: true };
+                }
+
+                if (child.parent) {
+                    const queryResult = await db.collection(DBCollections.LABELS).updateOne({ _id: dbId(child.parent) }, { $pull: { children: childId } }, { session });
+                    if (queryResult.modifiedCount < 1) {
+                        throw new Error('Cannot find old parent of child');
+                    }
+                }
+
+                if (!parentIsRoot) {
+                    const queryResult = await db.collection(DBCollections.LABELS).updateOne({ _id: parentId }, { $push: { children: childId } }, { session });
+                    if (queryResult.modifiedCount < 1) {
+                        throw new Error('Error in updating the parent label');
+                    }
+                }
+
+                const queryResult = await db.collection(DBCollections.LABELS).updateOne({ _id: childId }, { $set: { parent: parentIsRoot ? null : parentId } }, { session });
+                if (queryResult.modifiedCount < 1) {
+                    throw new Error('Error in updating the child label');
+                }
+
+            });
+
+            if (!parentDiscendantOfChild) {
+                const err: ApiError = {
+                    message: 'Parent can not be discendant of the child',
+                    code: ApiErrorCode.LABELS_PARENT_DISCENDANT_OF_CHILD
+                };
+                res.status(400).send(err);
+                return;
+            }
+
+            if (!childNotFound) {
+                const err: ApiError = {
+                    message: 'Child label not found',
+                    code: ApiErrorCode.PROVIDED_ID_NOT_FOUND
+                };
+                res.status(404).send(err);
+                return;
+            }
+
+            if (!parentNotFound) {
+                const err: ApiError = {
+                    message: 'Parent label not found',
+                    code: ApiErrorCode.PROVIDED_ID_NOT_FOUND
+                };
+                res.status(404).send(err);
+                return;
+            }
+
+            res.send();
+        });
+    });
 
 
 }

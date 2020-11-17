@@ -59,5 +59,21 @@ export function route(router: Router): void {
         });
     });
 
+    router.put('/labels/:lid', validateDbId('lid'), validate(validatePostOrPutLabels), purge(purgePutLabels), async (req: Request & ReqIdParams, res) => {
+        await aceInTheHole(res, async () => {
+            const lid = req.idParams.lid;
+            const body: ApiPutLabelsLidBody = req.body;
+
+            await dbQuery<void>(async db => {
+                const oldLabel: DBLabelDocument = await db.collection(DBCollections.LABELS).findOne({ _id: lid });
+                const newLabel = { ...body, children: oldLabel.children ?? [], parent: oldLabel.parent ?? null };
+                await db.collection(DBCollections.LABELS).replaceOne({ _id: lid }, newLabel, { upsert: true });
+            });
+
+            res.send();
+        });
+    });
+
+
 
 }

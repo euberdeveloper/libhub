@@ -43,4 +43,21 @@ export function route(router: Router): void {
         });
     });
 
+    router.post('/labels', validate(validatePostOrPutLabels), purge(purgePostLabels), async (req, res) => {
+        await aceInTheHole(res, async () => {
+            const body: ApiPostLabelsBody = req.body;
+            const lid = await dbQuery<ApiPostLabelsResult>(async db => {
+                const queryResult = await db.collection(DBCollections.LABELS).insertOne(body);
+                return queryResult?.insertedId?.toHexString();
+            });
+
+            if (!lid) {
+                throw new Error('Error in database insert');
+            }
+
+            res.send(lid);
+        });
+    });
+
+
 }

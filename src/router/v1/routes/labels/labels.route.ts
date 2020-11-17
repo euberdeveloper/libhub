@@ -23,4 +23,24 @@ export function route(router: Router): void {
         });
     });
 
+    router.get('/labels/:lid', validateDbId('lid'), async (req: Request & ReqIdParams, res) => {
+        await aceInTheHole(res, async () => {
+            const lid = req.idParams.lid;
+            const label = await dbQuery<ApiGetLabelsLid>(async db => {
+                return db.collection(DBCollections.LABELS).findOne({ _id: lid });
+            });
+
+            if (!label) {
+                const err: ApiError = {
+                    message: 'Label not found',
+                    code: ApiErrorCode.PROVIDED_ID_NOT_FOUND
+                };
+                res.status(404).send(err);
+                return;
+            }
+
+            res.send(label);
+        });
+    });
+
 }

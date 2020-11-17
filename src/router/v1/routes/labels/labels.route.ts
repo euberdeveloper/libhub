@@ -195,5 +195,25 @@ export function route(router: Router): void {
         });
     });
 
+    router.delete('/labels/:lid', validateDbId('lid'), async (req: Request & ReqIdParams, res) => {
+        await aceInTheHole(res, async () => {
+            const lid = req.idParams.lid;
+            const deleted = await dbTransaction<boolean>(async (db, session) => {
+                const queryResult = await db.collection(DBCollections.LABELS).deleteOne({ _id: lid }, { session });
+                return queryResult.deletedCount > 0;
+            });
+
+            if (!deleted) {
+                const err: ApiError = {
+                    message: 'Label not found',
+                    code: ApiErrorCode.PROVIDED_ID_NOT_FOUND,
+                };
+                res.status(404).send(err);
+                return;
+            }
+
+            res.send();
+        });
+    });
 
 }

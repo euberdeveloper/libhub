@@ -4,4 +4,4 @@ export type ApiGetIsbn = {
     publisher?: string;
     publicationYear?: Date;
     picturePath?: string;
-};
+};   

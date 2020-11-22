@@ -1,4 +1,5 @@
 export * from './error';
+export * from './isbn';
 export * from './labels';
 export * from './libraries';
 export * from './libraries/books';

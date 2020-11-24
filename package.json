@@ -1,6 +1,6 @@
 {
   "name": "libhub",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -10,19 +10,10 @@
     "lint": "eslint src/**/*.ts --format codeframe",
     "lint:fix": "eslint src/**/*.ts --format codeframe --fix",
     "postinstall": "npm run transpile",
-    "test:postman": "newman run test/postman/LibHub.postman_collection.json -e test/postman/LibHub.postman_environment.json",
-    "commit": "git-cz"
+    "test:postman": "newman run test/postman/LibHub.postman_collection.json -e test/postman/LibHub.postman_environment.json"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/euberdeveloper/libhub.git"
-  },
-  "author": "Eugenio Berretta <euberdeveloper@gmail.com>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/euberdeveloper/libhub/issues"
-  },
-  "homepage": "https://github.com/euberdeveloper/libhub#readme",
+  "author": "",
+  "license": "ISC",
   "dependencies": {
     "body-parser": "^1.19.0",
     "compression": "^1.7.4",

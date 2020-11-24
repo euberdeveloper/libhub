@@ -1,0 +1,1199 @@
+{
+	"info": {
+		"_postman_id": "ee1efc00-e03c-48d2-864f-bed908132027",
+		"name": "LibHub",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "ISBN",
+			"item": [
+				{
+					"name": "Info from ISBN",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "ba8566dc-86de-42ca-b095-33f463eeb273",
+								"exec": [
+									"pm.test(\"Correct Status\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"let jsonData = pm.response.json();\r",
+									"let schema = {\r",
+									"    \"title\" : {\"type\": \"string\"},\r",
+									"    \"authors\": {\"type\": \"array\"},\r",
+									"    \"publisher\": {\"type\": \"array\"},\r",
+									"    \"publicationYear\": {\"type\": \"date\"},\r",
+									"    \"language\": {\"type\": \"string\"},\r",
+									"    \"edition\": {\"type\": \"string\"},\r",
+									"    \"picture\": {\"type\": \"string\"},\r",
+									"};\r",
+									"\r",
+									"pm.test(\"Response Format\", function(){\r",
+									"    pm.expect(tv4.validate(jsonData, schema)).to.be.true;\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/v1/isbn/{{isbn}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"isbn",
+								"{{isbn}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "LABELS",
+			"item": [
+				{
+					"name": "Labels list",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "0767f6fb-98ae-4ece-a5f0-b2c20fa3812b",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "303b7e5d-523a-4583-ab9c-6b3568a38c99",
+								"exec": [
+									"pm.test(\"Correct Status\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"let jsonData = pm.response.json();\r",
+									"let schema = [\r",
+									"    {\r",
+									"        \"_id\" : {\"type\": \"string\"},\r",
+									"        \"name\": {\"type\": \"string\"},\r",
+									"        \"description\": {\"type\": \"string\"},\r",
+									"        \"colour\": {\"type\": \"string\"},\r",
+									"        \"children\": {\"type\": \"array\"},\r",
+									"        \"parent\" : {\"type\": \"string\"}\r",
+									"    }\r",
+									"];\r",
+									"\r",
+									"pm.test(\"Response Format\", function(){\r",
+									"    pm.expect(tv4.validate(jsonData, schema)).to.be.true;\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/labels",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"labels"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Label",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "1e03026f-d329-4285-805c-74ed7eac98c3",
+								"exec": [
+									"pm.test(\"Correct Status\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"let dataResponse = pm.response.text();\r",
+									"\r",
+									"pm.test(\"Response Format\", function(){\r",
+									"    pm.expect(dataResponse).to.be.a('string');\r",
+									"});\r",
+									"\r",
+									"pm.environment.set(\"label_id\", dataResponse);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "e99a212d-0ed5-4a49-9088-c8459d014894",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"{{label_name}}\",\r\n    \"description\": \"{{label_desc}}\",\r\n    \"colour\": \"{{label_colour}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/v1/labels",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"labels"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get a label",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "d67e09ce-3c4e-4ab8-9e22-6384fdf9411e",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "8b5ef4fd-0eb6-488b-8dae-01d80bbea593",
+								"exec": [
+									"pm.test(\"Correct Status\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"let jsonData = pm.response.json();\r",
+									"let schema = {\r",
+									"    \"_id\" : {\"type\": \"string\"},\r",
+									"    \"name\": {\"type\": \"string\"},\r",
+									"    \"description\": {\"type\": \"string\"},\r",
+									"    \"colour\": {\"type\": \"string\"},\r",
+									"    \"children\": {\"type\": \"array\"},\r",
+									"    \"parent\" : {\"type\": \"string\"}\r",
+									"};\r",
+									"\r",
+									"pm.test(\"Response Format\", function(){\r",
+									"    pm.expect(tv4.validate(jsonData, schema)).to.be.true;\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/labels/{{label_id}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"labels",
+								"{{label_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Replace label",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "900c2caf-5214-4b9d-979a-ef39c3ba9cdb",
+								"exec": [
+									"pm.test(\"Correct Status\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"{{label_name}}\",\r\n    \"description\": \"{{label_desc}}\",\r\n    \"colour\": \"{{label_colour}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/v1/labels/{{label_id}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"labels",
+								"{{label_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update label",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "a69ceda1-0cf2-4cc2-b465-4199869c524e",
+								"exec": [
+									"pm.test(\"Correct Status\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"{{label_name}}\",\r\n    \"description\": \"{{label_desc}}\",\r\n    \"colour\": \"{{label_colour}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/v1/labels/{{label_id}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"labels",
+								"{{label_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Label",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "6c828001-2709-4879-9d3d-8af97efa18ab",
+								"exec": [
+									"pm.test(\"Correct Status\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/labels/{{label_id}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"labels",
+								"{{label_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "LIBRARIES",
+			"item": [
+				{
+					"name": "Libraries list",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "08f03729-6023-45cc-8842-0dedefebbc34",
+								"exec": [
+									"pm.test(\"Correct Status\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"let jsonData = pm.response.json();\r",
+									"let schema = [\r",
+									"    {\r",
+									"        \"_id\" : {\"type\": \"string\"},\r",
+									"        \"name\": {\"type\": \"string\"},\r",
+									"        \"owners\": {\"type\": \"array\"},\r",
+									"        \"schema\": {\r",
+									"            \"resources\": {\"type\": \"array\"},\r",
+									"            \"ubications\": {\"type\": \"array\"}\r",
+									"        }\r",
+									"    }\r",
+									"];\r",
+									"\r",
+									"pm.test(\"Response Format\", function(){\r",
+									"    pm.expect(tv4.validate(jsonData, schema)).to.be.true;\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/libraries",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"libraries"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Library",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "57f341e5-0167-412a-9969-5291a48393e0",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "2ddaa795-4f06-471c-8bb6-f39e46fe989d",
+								"exec": [
+									"pm.test(\"Correct Status\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"let dataResponse = pm.response.text();\r",
+									"\r",
+									"pm.test(\"Response Format\", function(){\r",
+									"    pm.expect(dataResponse).to.be.a('string');\r",
+									"});\r",
+									"\r",
+									"pm.environment.set(\"library_id\", dataResponse);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"{{library_name}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/v1/libraries",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"libraries"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get a library",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "587d4a9c-a4d7-4805-af45-5b4c3abf2d79",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "51fe73ea-cb84-4730-9d96-1f8bc07f6d10",
+								"exec": [
+									"pm.test(\"Correct Status\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/libraries/{{library_id}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"libraries",
+								"{{library_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Replace library",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "d0d99322-9c90-4121-8760-855b9ecd6169",
+								"exec": [
+									"pm.test(\"Correct Status\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"{{library_name}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/v1/libraries/{{library_id}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"libraries",
+								"{{library_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update library",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "0f703fea-6f49-4030-9177-8ab897744399",
+								"exec": [
+									"pm.test(\"Correct Status\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"{{library_name}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/v1/libraries/{{library_id}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"libraries",
+								"{{library_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete library",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "e0cd4880-b3cd-444d-b0b1-5463845d0f8d",
+								"exec": [
+									"pm.test(\"Correct Status\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/libraries/{{library_id}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"libraries",
+								"{{library_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "SCHEMA",
+			"item": [
+				{
+					"name": "Ubications list",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "989da2e5-f61a-4110-b273-0bd97a576e08",
+								"exec": [
+									"pm.test(\"Correct Status\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/libraries/5fbe941d48770800c7354e6f/schema/ubications",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"libraries",
+								"5fbe941d48770800c7354e6f",
+								"schema",
+								"ubications"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add ubication",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "d01ab8d6-e14d-4010-8dfc-7fe6feea4d50",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "68eedfd3-5c08-4509-a102-1ff4f5dc25dd",
+								"exec": [
+									"pm.test(\"Correct Status\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"let dataResponse = pm.response.text();\r",
+									"\r",
+									"pm.test(\"Response Format\", function(){\r",
+									"    pm.expect(dataResponse).to.be.a('string');\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"ubication\": \"{{ubication_name}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/v1/libraries/5fbe941d48770800c7354e6f/schema/ubications",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"libraries",
+								"5fbe941d48770800c7354e6f",
+								"schema",
+								"ubications"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remove ubication",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/libraries/5fbe941d48770800c7354e6f/schema/ubications/{{ubication_name}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"libraries",
+								"5fbe941d48770800c7354e6f",
+								"schema",
+								"ubications",
+								"{{ubication_name}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Resources list",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "aeba32fe-b69a-49e6-8dd2-a3bc40127d36",
+								"exec": [
+									"pm.test(\"Correct Status\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/libraries/5fbe941d48770800c7354e6f/schema/resources",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"libraries",
+								"5fbe941d48770800c7354e6f",
+								"schema",
+								"resources"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "BOOKS",
+			"item": [
+				{
+					"name": "Book list",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "58c74c71-bf0f-4ede-84c7-7164c79e72e7",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "529ca267-3f6f-4b6a-91f5-fa839c854db3",
+								"exec": [
+									"pm.test(\"Correct Status\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"let jsonData = pm.response.json();\r",
+									"let schema = [\r",
+									"    {\r",
+									"        \"_id\" : {\"type\": \"string\"},\r",
+									"        \"libraryId\": {\"type\": \"string\"},\r",
+									"        \"isbn\": {\"type\": \"string\"},\r",
+									"        \"title\": {\"type\": \"string\"},\r",
+									"        \"authors\": {\"type\": \"array\"},\r",
+									"        \"publisher\" : {\"type\": \"string\"},\r",
+									"        \"publisher\" : {\"type\": \"number\"},\r",
+									"        \"edition\" : {\"type\": \"string\"},\r",
+									"        \"condition\" : {\"type\": \"string\"},\r",
+									"        \"ubication\" : {\"type\": \"string\"},\r",
+									"        \"labels\" : {\"type\": \"array\"},\r",
+									"        \"pictures\" : {\"type\": \"array\"},\r",
+									"        \"notes\" : {\"type\": \"string\"},\r",
+									"    }\r",
+									"];\r",
+									"\r",
+									"pm.test(\"Response Format\", function(){\r",
+									"    pm.expect(tv4.validate(jsonData, schema)).to.be.true;\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/libraries/5fbe941d48770800c7354e6f/books",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"libraries",
+								"5fbe941d48770800c7354e6f",
+								"books"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create book",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "145045cd-de82-4ed8-b240-c1e51ffc7eb3",
+								"exec": [
+									"pm.test(\"Correct Status\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"let dataResponse = pm.response.text();\r",
+									"\r",
+									"pm.test(\"Response Format\", function(){\r",
+									"    pm.expect(dataResponse).to.be.a('string');\r",
+									"});\r",
+									"\r",
+									"pm.environment.set(\"book_id\", dataResponse);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "9215e764-33d4-42e0-ba2d-86d1dadd7507",
+								"exec": [
+									"pm.environment.get(\"book_isbn\") != null;\r",
+									"pm.environment.get(\"book_title\") != null;\r",
+									"pm.environment.get(\"book_ubication\") != null;"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"isbn\": \"{{book_isbn}}\",\r\n    \"title\": \"{{book_title}}\",\r\n    \"authors\": {{book_authors}},\r\n    \"publisher\": \"{{book_publisher}}\",\r\n    \"publicationYear\" : \"{{book_year}}\",\r\n    \"edition\": \"{{book_edition}}\",\r\n    \"condition\": \"{{book_condition}}\",\r\n    \"ubication\": \"{{book_ubication}}\",\r\n    \"labels\": {{book_labels}},\r\n    \"notes\": \"{{book_notes}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/v1/libraries/5fbe941d48770800c7354e6f/books",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"libraries",
+								"5fbe941d48770800c7354e6f",
+								"books"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get a book",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "d4df2dc4-e6fd-474e-b8b7-19325a1719e6",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "92e69b44-b65f-455a-9a51-1e35273cc5a8",
+								"exec": [
+									"pm.test(\"Correct Status\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"let jsonData = pm.response.json();\r",
+									"let schema = {\r",
+									"    \"_id\" : {\"type\": \"string\"},\r",
+									"    \"libraryId\": {\"type\": \"string\"},\r",
+									"    \"isbn\": {\"type\": \"string\"},\r",
+									"    \"title\": {\"type\": \"string\"},\r",
+									"    \"authors\": {\"type\": \"array\"},\r",
+									"    \"publisher\" : {\"type\": \"string\"},\r",
+									"    \"publisher\" : {\"type\": \"number\"},\r",
+									"    \"edition\" : {\"type\": \"string\"},\r",
+									"    \"condition\" : {\"type\": \"string\"},\r",
+									"    \"ubication\" : {\"type\": \"string\"},\r",
+									"    \"labels\" : {\"type\": \"array\"},\r",
+									"    \"pictures\" : {\"type\": \"array\"},\r",
+									"    \"notes\" : {\"type\": \"string\"},\r",
+									"};\r",
+									"\r",
+									"pm.test(\"Response Format\", function(){\r",
+									"    pm.expect(tv4.validate(jsonData, schema)).to.be.true;\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/libraries/5fbe941d48770800c7354e6f/books/{{book_id}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"libraries",
+								"5fbe941d48770800c7354e6f",
+								"books",
+								"{{book_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Replace book",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "c2acff58-1c69-4e10-9300-4a3f17c817f7",
+								"exec": [
+									"pm.test(\"Correct Status\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"isbn\": \"{{book_isbn}}\",\r\n    \"title\": \"{{book_title}}\",\r\n    \"authors\": {{book_authors}},\r\n    \"publisher\": \"{{book_publisher}}\",\r\n  \"publicationYear\" : \"{{book_year}}\",\r\n   \"edition\": \"{{book_edition}}\",\r\n    \"condition\": \"{{book_condition}}\",\r\n    \"ubication\": \"{{book_ubication}}\",\r\n    \"labels\": {{book_labels}},\r\n    \"notes\": \"{{book_notes}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/v1/libraries/5fbe941d48770800c7354e6f/books/{{book_id}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"libraries",
+								"5fbe941d48770800c7354e6f",
+								"books",
+								"{{book_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update book",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "69e70a5f-388c-414e-9a1f-94337fdb8d2e",
+								"exec": [
+									"pm.test(\"Correct Status\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"isbn\": \"{{book_isbn}}\",\r\n    \"title\": \"{{book_title}}\",\r\n    \"authors\": {{book_authors}},\r\n    \"publisher\": \"{{book_publisher}}\",\r\n    \"edition\": \"{{book_edition}}\",\r\n    \"condition\": \"{{book_condition}}\",\r\n    \"ubication\": \"{{book_ubication}}\",\r\n    \"labels\": {{book_labels}},\r\n    \"notes\": \"{{book_notes}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/v1/libraries/5fbe941d48770800c7354e6f/books/{{book_id}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"libraries",
+								"5fbe941d48770800c7354e6f",
+								"books",
+								"{{book_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete book",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "e4f65734-2fdb-49c4-aece-f0fbf5eeae9d",
+								"exec": [
+									"pm.test(\"Correct Status\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/libraries/5fbe941d48770800c7354e6f/books/{{book_id}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"libraries",
+								"5fbe941d48770800c7354e6f",
+								"books",
+								"{{book_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		}
+	],
+	"protocolProfileBehavior": {}
+}

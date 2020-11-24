@@ -2,7 +2,7 @@ import 'module-alias/register';
 
 import * as express from 'express';
 import * as http from 'http';
-import * as compression from 'compression'; 
+import * as compression from 'compression';
 import * as helmet from 'helmet';
 import * as cors from 'cors';
 import * as morgan from 'morgan';

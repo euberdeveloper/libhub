@@ -44,11 +44,11 @@ export function route(router: Router): void {
             res.send(books as ApiGetLibrariesLidBooks);
         });
     });
-
+ 
     router.get('/libraries/:lid/books/:bid', validateDbId(['lid', 'bid']), async (req: Request & ReqIdParams, res) => {
         await aceInTheHole(res, async () => {
             const { lid, bid } = req.idParams;
-
+            
             const book = await dbQuery<ApiGetLibrariesLidBooksBid>(async db => {
                 return db.collection(DBCollections.BOOKS).findOne({ _id: bid, libraryId: lid.toHexString() });
             });
@@ -93,7 +93,7 @@ export function route(router: Router): void {
             if (!bid) {
                 throw new Error('Error in database insert');
             }
-
+            
             res.send(bid);
         });
     });
@@ -137,6 +137,7 @@ export function route(router: Router): void {
             res.send(fileName);
         });
     });
+    
 
     router.put('/libraries/:lid/books/:bid', validateDbId(['lid', 'bid']), deserializeDates(['publicationYear']), validate(validatePostOrPutBooks), purge(purgePutBooks), async (req: Request & ReqIdParams, res) => {
         await aceInTheHole(res, async () => {
@@ -258,5 +259,4 @@ export function route(router: Router): void {
             res.send();
         });
     });
-
 }

@@ -215,5 +215,4 @@ export function route(router: Router): void {
             res.send();
         });
     });
-
 }

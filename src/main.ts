@@ -12,7 +12,7 @@ import { httpsRedirect } from './utils/httpsRedirect';
 import CONFIG from '@/config';
 import router from '@/router';
 
-const app = express();
+const app = express(); 
 
 app.use(compression());
 if (process.env.NODE_ENV === 'production') {

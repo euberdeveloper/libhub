@@ -10,7 +10,8 @@
     "lint": "eslint src/**/*.ts --format codeframe",
     "lint:fix": "eslint src/**/*.ts --format codeframe --fix",
     "postinstall": "npm run transpile",
-    "test:postman": "newman run test/postman/LibHub.postman_collection.json -e test/postman/LibHub.postman_environment.json"
+    "test:postman": "newman run test/postman/LibHub.postman_collection.json -e test/postman/LibHub.postman_environment.json",
+    "commit": "git-cz"
   },
   "author": "",
   "license": "ISC",

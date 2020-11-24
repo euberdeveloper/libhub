@@ -11,7 +11,12 @@ const scratchers = getScratchers();
 let page: puppeteer.Page | null = null;
 
 async function initPupetteer(): Promise<void> {
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+        ],
+    });
     page = await browser.newPage();
 }
 
@@ -32,7 +37,7 @@ export async function getIsbnInfo(isbn: string, timeout: number = 10000): Promis
             ]);
             break;
         }
-        catch (error) {}
+        catch (error) { }
     }
 
     return result;

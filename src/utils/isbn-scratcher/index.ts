@@ -15,7 +15,7 @@ async function initPupetteer(): Promise<void> {
         args: [
             '--no-sandbox',
             '--disable-setuid-sandbox',
-        ],
+        ]
     });
     page = await browser.newPage();
 }

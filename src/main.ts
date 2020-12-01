@@ -25,9 +25,10 @@ app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+app.use('/api', router());
 app.use(history());
 app.use(express.static(CONFIG.SETTINGS.PUBLIC_PATH));
-app.use('/api', router());
+
 
 http.createServer(app).listen(CONFIG.SERVER.PORT);
 console.log(`Http listening on port ${CONFIG.SERVER.PORT}`);

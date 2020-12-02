@@ -8,7 +8,7 @@ import * as cors from 'cors';
 import * as morgan from 'morgan';
 import * as bodyParser from 'body-parser';
 import * as history from 'connect-history-api-fallback';
-import { httpsRedirect } from './utils/httpsRedirect';
+import { httpsRedirect } from './utils/httpsRedirect'; 
 
 import CONFIG from '@/config';
 import router from '@/router';

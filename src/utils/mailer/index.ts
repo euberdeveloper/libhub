@@ -4,6 +4,9 @@ import { pugEngine } from 'nodemailer-pug-engine';
 import { EmailTemplates } from '@/types';
 import CONFIG from '@/config';
 
+export * from './registration';
+export * from './passwordRecovery';
+
 /**
  * creates a mailer transport
  */

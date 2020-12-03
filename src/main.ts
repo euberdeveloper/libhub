@@ -7,7 +7,6 @@ import * as helmet from 'helmet';
 import * as cors from 'cors';
 import * as morgan from 'morgan';
 import * as bodyParser from 'body-parser';
-import * as history from 'connect-history-api-fallback';
 import { httpsRedirect } from './utils/httpsRedirect'; 
 
 import CONFIG from '@/config';
@@ -25,10 +24,8 @@ app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+app.use('/stored', express.static(CONFIG.SETTINGS.STORED_PATH));
 app.use('/api', router());
-app.use(history());
-app.use(express.static(CONFIG.SETTINGS.PUBLIC_PATH));
-
 
 http.createServer(app).listen(CONFIG.SERVER.PORT);
 console.log(`Http listening on port ${CONFIG.SERVER.PORT}`);

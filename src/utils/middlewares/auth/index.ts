@@ -31,6 +31,23 @@ export function auth(param?: string): RequestHandler {
                 return db.collection(DBCollections.USERS).findOne({ username: tokenData.username, password: tokenData.password });
             });
 
+            if (!user) {
+                const err: ApiError = {
+                    message: 'Unexpected error, user not found in db',
+                    code: ApiErrorCode.INTERNAL_SERVER_ERROR
+                };
+                res.status(500).send(err);
+                return;
+            }
+            else if (param && req.params[param] != user._id) {
+                const err: ApiError = {
+                    message: 'User not authorized to call this api',
+                    code: ApiErrorCode.USER_UNAUTHORIZED
+                };
+                res.status(403).send(err);
+                return;
+            }
+
             req.user = user;
             next();
         }

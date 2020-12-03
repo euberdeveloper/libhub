@@ -100,7 +100,7 @@
 									"        \"_id\" : {\"type\": \"string\"},\r",
 									"        \"name\": {\"type\": \"string\"},\r",
 									"        \"description\": {\"type\": \"string\"},\r",
-									"        \"colour\": {\"type\": \"string\"},\r",
+									"        \"color\": {\"type\": \"string\"},\r",
 									"        \"children\": {\"type\": \"array\"},\r",
 									"        \"parent\" : {\"type\": \"string\"}\r",
 									"    }\r",
@@ -172,7 +172,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"{{label_name}}\",\r\n    \"description\": \"{{label_desc}}\",\r\n    \"colour\": \"{{label_colour}}\"\r\n}",
+							"raw": "{\r\n    \"name\": \"{{label_name}}\",\r\n    \"description\": \"{{label_desc}}\",\r\n    \"color\": \"{{label_color}}\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -222,7 +222,7 @@
 									"    \"_id\" : {\"type\": \"string\"},\r",
 									"    \"name\": {\"type\": \"string\"},\r",
 									"    \"description\": {\"type\": \"string\"},\r",
-									"    \"colour\": {\"type\": \"string\"},\r",
+									"    \"color\": {\"type\": \"string\"},\r",
 									"    \"children\": {\"type\": \"array\"},\r",
 									"    \"parent\" : {\"type\": \"string\"}\r",
 									"};\r",
@@ -276,7 +276,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"{{label_name}}\",\r\n    \"description\": \"{{label_desc}}\",\r\n    \"colour\": \"{{label_colour}}\"\r\n}",
+							"raw": "{\r\n    \"name\": \"{{label_name}}\",\r\n    \"description\": \"{{label_desc}}\",\r\n    \"color\": \"{{label_color}}\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -321,7 +321,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"{{label_name}}\",\r\n    \"description\": \"{{label_desc}}\",\r\n    \"colour\": \"{{label_colour}}\"\r\n}",
+							"raw": "{\r\n    \"name\": \"{{label_name}}\",\r\n    \"description\": \"{{label_desc}}\",\r\n    \"color\": \"{{label_color}}\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"

@@ -30,13 +30,20 @@ export default async function () {
             const added = await fsAsync.exists(path.join(__dirname, 'assets', 'test.txt'));
             expect(added).to.be.true;
         });
-        
+
         it('Should remove "test.txt"', async function () {
             await fsAsync.unlink(path.join(__dirname, 'assets', 'test.txt'));
 
             const removed = await fsAsync.exists(path.join(__dirname, 'assets', 'test.txt'));
             expect(removed).to.be.false;
         });
+
+        it('Should make a directory "mydir"', async function () {
+            await fsAsync.mkdir(path.join(__dirname, 'assets', 'directory'));
+            const exists = await fsAsync.exists(path.join(__dirname, 'assets', 'directory'));
+            expect(exists).to.be.true;
+        });
+        
 
     });
 

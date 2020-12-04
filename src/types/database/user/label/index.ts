@@ -1,4 +1,4 @@
-import { DBDocument } from '..';
+import { DBDocument } from '../..';
 
 export interface DBLabelDocument extends DBDocument {
     _id: string;

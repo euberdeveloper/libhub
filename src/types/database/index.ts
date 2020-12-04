@@ -1,6 +1,6 @@
 export * from './collections';
 export * from './book';
-export * from './label';
+export * from './user/label';
 export * from './user/library';
 
 export interface DBDocument {

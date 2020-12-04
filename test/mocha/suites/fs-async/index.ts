@@ -20,6 +20,16 @@ export default async function () {
             const exists = await fsAsync.exists(path.join(__dirname, 'assets', 'prova.txt'));
             expect(exists).to.be.true;
         });
+
+        it('Should rename "prova.txt" with "test.txt"', async function () {
+            await fsAsync.rename(path.join(__dirname, 'assets', 'prova.txt'), path.join(__dirname, 'assets', 'test.txt'));
+
+            const removed = await fsAsync.exists(path.join(__dirname, 'assets', 'prova.txt'));
+            expect(removed).to.be.false;
+
+            const added = await fsAsync.exists(path.join(__dirname, 'assets', 'test.txt'));
+            expect(added).to.be.true;
+        });
         
 
     });

@@ -1,5 +1,5 @@
 export * from './collections';
-export * from './book';
+export * from './user/book';
 export * from './user/label';
 export * from './user/library';
 

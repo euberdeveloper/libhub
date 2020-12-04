@@ -1,4 +1,4 @@
-import { DBDocument } from '..';
+import { DBDocument } from '../..';
 import { DBLibrarySchema } from './schema';
 
 export * from './schema';

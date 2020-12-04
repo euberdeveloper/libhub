@@ -1,10 +1,15 @@
 import { Router } from 'express';
-import v1 from './v1';
+import { scan } from 'dree';
+import * as path from 'path';
 
 export default function(): Router {
     const router = Router();
 
-    router.use('/v1', v1());
+    scan(path.join(__dirname, 'routes'), { extensions: ['js'] }, file => {
+        if (file.name.includes('.route')) {
+            require(file.path).route(router);
+        }
+    });
 
     return router;
 }

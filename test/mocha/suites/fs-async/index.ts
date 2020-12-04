@@ -15,8 +15,11 @@ export default async function () {
             expect(notExists).to.be.false;
         });
 
-        
-
+        it('Should create a file "prova.txt"', async function () {
+            await fsAsync.writeFile(path.join(__dirname, 'assets', 'prova.txt'), 'prova');
+            const exists = await fsAsync.exists(path.join(__dirname, 'assets', 'prova.txt'));
+            expect(exists).to.be.true;
+        });
         
 
     });

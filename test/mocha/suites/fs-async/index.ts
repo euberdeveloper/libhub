@@ -31,6 +31,12 @@ export default async function () {
             expect(added).to.be.true;
         });
         
+        it('Should remove "test.txt"', async function () {
+            await fsAsync.unlink(path.join(__dirname, 'assets', 'test.txt'));
+
+            const removed = await fsAsync.exists(path.join(__dirname, 'assets', 'test.txt'));
+            expect(removed).to.be.false;
+        });
 
     });
 

@@ -52,7 +52,38 @@ export function route(router: Router): void {
         });
     });
 
-    
+    router.post('/users/password-recovery/email/:email', async (req, res) => {
+        await aceInTheHole(res, async () => {
+            const email = req.params.email;
+            const recoverPasswordToken = uuid();
+
+            const userExists = await dbTransaction<boolean>(async (db, session) => {
+                const queryObject = { email };
+                const updateObject = { $set: { recoverPasswordToken } };
+                const queryResult = await db.collection(DBCollections.USERS).findOneAndUpdate(queryObject, updateObject, { returnOriginal: false, session });
+
+                const user = queryResult.value;
+
+                if (!user) {
+                    return false;
+                }
+
+                await mailer.recoverPassword(user);
+                return user;
+            });
+
+            if (!userExists) {
+                const err: ApiError = {
+                    message: 'Email does not exists',
+                    code: ApiErrorCode.EMAIL_NOT_EXISTS
+                };
+                res.status(400).send(err);
+                return;
+            }
+
+            res.send();
+        });
+    });
 
 
 

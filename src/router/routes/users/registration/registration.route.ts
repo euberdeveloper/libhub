@@ -139,6 +139,26 @@ export function route(router: Router): void {
         });
     });
 
-    
+    router.delete('/users/:uid', auth('uid'), async (req, res) => {
+        await aceInTheHole(res, async () => {
+            const user = (req as any).user;
+
+            const deleted = await dbQuery<boolean>(async db => {
+                const result = await db.collection(DBCollections.USERS).deleteOne({ _id: user._id });
+                return result.deletedCount > 0;
+            });
+
+            if (!deleted) {
+                const err: ApiError = {
+                    message: 'Provided id not found',
+                    code: ApiErrorCode.PROVIDED_ID_NOT_FOUND
+                };
+                res.status(404).send(err);
+                return;
+            }
+
+            res.send();
+        });
+    });
 
 }

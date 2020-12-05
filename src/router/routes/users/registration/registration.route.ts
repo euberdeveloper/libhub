@@ -67,7 +67,34 @@ export function route(router: Router): void {
         });
     });
 
-    
+    router.post('/users/:uid/verify/:token', validateDbId('uid'), async (req: Request & ReqIdParams, res) => {
+        await aceInTheHole(res, async () => {
+            const verificationToken = req.params.token;
+            const uid = req.idParams.uid;
+
+            const user = await dbQuery<DBUser>(async db => {
+                const queryObject = { _id: uid, verificationToken: verificationToken };
+                const updateObject = { $set: { verificationToken: null, verified: true } };
+                const updateResult = await db.collection(DBCollections.USERS).findOneAndUpdate(queryObject, updateObject, { returnOriginal: false });
+
+                return updateResult.value;
+            });
+
+            if (!user) {
+                const err: ApiError = {
+                    message: 'Provided id not found',
+                    code: ApiErrorCode.PROVIDED_ID_NOT_FOUND
+                };
+                res.status(400).send(err);
+                return;
+            }
+
+            const token = jwt.sign({ username: user.username, password: user.password }, CONFIG.SECURITY.JWT.KEY);
+            const response: ApiPostUsersVerifyTokenResult = { user, token };
+
+            res.send(response);
+        });
+    });
 
     
 

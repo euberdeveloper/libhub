@@ -96,7 +96,48 @@ export function route(router: Router): void {
         });
     });
 
-    
+    router.post('/users/login', validate(validateLogin), purge(purgeLogin), async (req, res) => {
+        await aceInTheHole(res, async () => {
+            const body: ApiPostUsersLoginBody = req.body;
+
+            const user = await dbQuery<DBUser>(async db => {
+                return db.collection(DBCollections.USERS).findOne({ username: body.username });
+            });
+
+            if (!user) {
+                const err: ApiError = {
+                    message: 'Invalid login',
+                    code: ApiErrorCode.INVALID_LOGIN
+                };
+                res.status(400).send(err);
+                return;
+            }
+
+            const isPasswordValid = bcrypt.compareSync(body.password, user.password);
+            if (!isPasswordValid) {
+                const err: ApiError = {
+                    message: 'Invalid login',
+                    code: ApiErrorCode.INVALID_LOGIN
+                };
+                res.status(400).send(err);
+                return;
+            }
+
+            if (!user.verified) {
+                const err: ApiError = {
+                    message: 'User not verified',
+                    code: ApiErrorCode.USER_NOT_VERIFIED
+                };
+                res.status(400).send(err);
+                return;
+            }
+
+            const token = jwt.sign({ username: user.username, password: user.password }, CONFIG.SECURITY.JWT.KEY);
+            const response: ApiPostUsersLoginResult = { user, token };
+
+            res.send(response);
+        });
+    });
 
     
 

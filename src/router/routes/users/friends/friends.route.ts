@@ -53,5 +53,65 @@ export function route(router: Router): void {
         });
     });
 
+    router.post('/users/:uid/friends/:username', auth('uid'), validate(validateFriendRequest), purge(purgeFriendRequest), async (req: Request & ReqAuthenticated, res) => {
+        await aceInTheHole(res, async () => {
+            const user = req.user;
+            const username = req.params.username;
+            const body: ApiPostUserUidFriendsUsernameBody = req.body;
+
+            if (user.username === username) {
+                const err: ApiError = {
+                    message: 'User can not be friend with himself',
+                    code: ApiErrorCode.USER_CANNOT_BE_FRIEND_WITH_HIMSELF
+                };
+                res.status(400).send(err);
+                return;
+            }
+
+            const friend = await dbQuery<DBUser>(async db => {
+                return db.collection(DBCollections.USERS).findOne({ username });
+            });
+
+            if (user.friends.find(f => f == friend._id)) {
+                const err: ApiError = {
+                    message: 'User is already friend',
+                    code: ApiErrorCode.USER_IS_ALREADY_FRIEND
+                };
+                res.status(400).send(err);
+                return;
+            }
+
+            const alreadyRequest = await dbQuery<boolean>(async db => {
+                return db.collection(DBCollections.FRIEND_REQUESTS).findOne({ requestBy: user._id, requestTo: friend._id });
+            });
+
+            if (alreadyRequest) {
+                const err: ApiError = {
+                    message: 'User is already friend',
+                    code: ApiErrorCode.USER_IS_ALREADY_FRIEND
+                };
+                res.status(400).send(err);
+                return;
+            }
+
+            const inserted = await dbQuery<boolean>(async db => {
+                const friendRequest: Omit<DBFriendRequest, '_id'> = {
+                    createdOn: new Date(),
+                    message: body.message,
+                    requestBy: user._id,
+                    requestTo: friend._id
+                };
+                const insertResult = await db.collection(DBCollections.FRIEND_REQUESTS).insertOne(friendRequest);
+                return !!insertResult.insertedId;
+            });
+
+            if (!inserted) {
+                throw new Error('Error in inserting friend request');
+            }
+
+            res.send();
+        });
+    });
+
 
 }

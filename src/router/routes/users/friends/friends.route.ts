@@ -160,4 +160,43 @@ export function route(router: Router): void {
         });
     });
 
+    router.post('/users/:uid/friends/friend-requests/received/:rid', auth('uid'), validate(validateFriendRequestResponse), purge(purgeFriendRequestResponse), validateDbId('rid'), async (req: Request & ReqAuthenticated & ReqIdParams, res) => {
+        await aceInTheHole(res, async () => {
+            const user = req.user;
+            const rid = req.idParams.rid;
+            const body: ApiPostUserUidFriendsFriendRequestsReceivedBody = req.body;
+
+            const friendRequest = await dbQuery<DBFriendRequest>(async db => {
+                return db.collection(DBCollections.FRIEND_REQUESTS).findOne({ _id: rid, requestTo: user._id });
+            });
+
+            if (!friendRequest) {
+                const err: ApiError = {
+                    message: 'Provided id not found',
+                    code: ApiErrorCode.PROVIDED_ID_NOT_FOUND
+                };
+                res.status(404).send(err);
+                return;
+            }
+
+            const friend = await dbQuery<DBUser>(async db => {
+                return db.collection(DBCollections.USERS).findOne({ _id: friendRequest.requestBy });
+            });
+
+            if (!friend) {
+                throw new Error('Friend not found');
+            }
+
+            await dbTransaction<unknown>(async (db, session) => {
+                await db.collection(DBCollections.FRIEND_REQUESTS).deleteOne({ _id: rid }, { session });
+
+                if (body.accepted) {
+                    await db.collection(DBCollections.USERS).updateOne({ _id: user._id }, { $addToSet: { friends: friend._id } }, { session });
+                    await db.collection(DBCollections.USERS).updateOne({ _id: friend._id }, { $addToSet: { friends: user._id } }, { session });
+                }
+            });
+
+            res.send();
+        });
+    });
 }

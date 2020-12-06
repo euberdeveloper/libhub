@@ -125,5 +125,27 @@ export function route(router: Router): void {
         });
     });
 
+    router.delete('/users/:uid/friends/friend-requests/sent/:rid', auth('uid'), validateDbId('rid'), async (req: Request & ReqAuthenticated & ReqIdParams, res) => {
+        await aceInTheHole(res, async () => {
+            const user = req.user;
+            const rid = req.idParams.rid;
+            
+            const deleted = await dbQuery<boolean>(async db => {
+                const queryResult = await db.collection(DBCollections.FRIEND_REQUESTS).deleteOne({ _id: rid, requestBy: user._id });
+                return queryResult.deletedCount > 0;
+            });
+
+            if (!deleted) {
+                const err: ApiError = {
+                    message: 'Provided id not found',
+                    code: ApiErrorCode.PROVIDED_ID_NOT_FOUND
+                };
+                res.status(404).send(err);
+                return;
+            }
+
+            res.send();
+        });
+    });
 
 }

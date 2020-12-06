@@ -15,7 +15,18 @@ import { purgeFriendRequest, purgeFriendRequestResponse, validateFriendRequest, 
 
 export function route(router: Router): void {
 
-    
+    router.get('/users/usernames', auth(), async (req: Request & ReqAuthenticated, res) => {
+        await aceInTheHole(res, async () => {
+            const user = req.user;
+            
+            const users = await dbQuery<DBUser[]>(async db => {
+                return db.collection(DBCollections.USERS).find({ _id: { $ne: user._id } }).project({ _id: true, username: true }).toArray();
+            });
+
+            res.send(users);
+        });
+    });
+
 
 
 

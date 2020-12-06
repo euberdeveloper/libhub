@@ -110,4 +110,25 @@ export function route(router: Router): void {
         });
     });
 
+    router.delete('/users/:uid/profile/avatar', auth('uid'), async (req: Request & ReqAuthenticated, res) => {
+        await aceInTheHole(res, async () => {
+            const user = req.user;
+            const uid = user._id as unknown as ObjectID;
+            
+            await dbTransaction<unknown>(async (db, session) => {
+                const queryResult = await db.collection(DBCollections.USERS).updateOne({ _id: uid }, { $set: { avatar: null } }, { session });
+                if (queryResult.matchedCount < 1) {
+                    throw new Error('Error in updating user');
+                }
+
+                const avatarPath = path.join(CONFIG.UPLOAD.STORED_LOCATIONS.USERS(uid.toHexString()), 'avatar.jpg');
+                if (await exists(avatarPath)) {
+                    await unlink(avatarPath);
+                }
+            });
+
+            res.send();
+        });
+    });
+
 }

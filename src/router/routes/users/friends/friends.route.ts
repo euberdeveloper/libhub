@@ -27,6 +27,16 @@ export function route(router: Router): void {
         });
     });
 
+    router.get('/users/:uid/friends', auth('uid'), async (req: Request & ReqAuthenticated, res) => {
+        await aceInTheHole(res, async () => {
+            const user = req.user;
+            const friendsIds = user.friends;
+            const friends = await dbQuery<DBUser[]>(async db => {
+                return db.collection(DBCollections.USERS).find({ _id: { $in: friendsIds } }).project({ password: false }).toArray();
+            });
+            res.send(friends);
+        });
+    });
 
 
 

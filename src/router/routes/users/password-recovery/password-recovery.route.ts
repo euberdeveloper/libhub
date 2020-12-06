@@ -85,6 +85,48 @@ export function route(router: Router): void {
         });
     });
 
+    router.post('/users/:username/password-recovery/:token', validate(validateRecovery), purge(purgeRecovery), async (req, res) => {
+        await aceInTheHole(res, async () => {
+            const { username, token: recoverPasswordToken } = req.params;
+            const body: ApiPostUsersUsernamePasswordRecoveryTokenBody = req.body;
+
+            const user = await dbQuery<DBUser>(async db => {
+                return db.collection(DBCollections.USERS).findOne({ username });
+            });
+
+            if (!user) {
+                const err: ApiError = {
+                    message: 'Username not found',
+                    code: ApiErrorCode.USERNAME_NOT_FOUND
+                };
+                res.status(404).send(err);
+                return;
+            }
+
+            if (user.recoverPasswordToken !== recoverPasswordToken) {
+                const err: ApiError = {
+                    message: 'Invalid token',
+                    code: ApiErrorCode.INVALID_TOKEN
+                };
+                res.status(400).send(err);
+                return;
+            }
+
+            await dbQuery<unknown>(async db => {
+                const queryResult = await db.collection(DBCollections.USERS).updateOne({ _id: user._id }, { $set: { password: body.password, recoverPasswordToken: null } });
+                const updated = queryResult.matchedCount > 0;
+
+                if (!updated) {
+                    throw new Error('User password not updated');
+                }
+            });
+
+            const token = jwt.sign({ username: user.username, password: body.password }, CONFIG.SECURITY.JWT.KEY);
+            const response: ApiPostUsersUsernamePasswordRecoveryTokenResult = { user, token };
+
+            res.send(response);
+        });
+    });
 
 
 }

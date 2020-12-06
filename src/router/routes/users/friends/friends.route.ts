@@ -38,6 +38,20 @@ export function route(router: Router): void {
         });
     });
 
+    router.delete('/users/:uid/friends/:fid', auth('uid'), validateDbId('fid'), async (req: Request & ReqAuthenticated & ReqIdParams, res) => {
+        await aceInTheHole(res, async () => {
+            const user = req.user;
+            const fid = req.idParams.fid;
+
+            await dbTransaction<boolean>(async (db, session) => {
+                const updateCurrentResult = await db.collection(DBCollections.USERS).updateOne({ _id: user._id }, { $pull: { friends: fid } }, { session });
+                const updateOther = await db.collection(DBCollections.USERS).updateOne({ _id: fid }, { $pull: { friends: user._id } }, { session });
+                return updateCurrentResult.matchedCount > 0 && updateOther.matchedCount > 0;
+            });
+
+            res.send();
+        });
+    });
 
 
 }

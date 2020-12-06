@@ -37,5 +37,27 @@ export function route(router: Router): void {
         });
     });
 
+    router.patch('/users/:uid/profile', auth('uid'), validate(validatePatchProfile), purge(purgePatchProfile), async (req: Request & ReqAuthenticated, res) => {
+        await aceInTheHole(res, async () => {
+            const user = req.user;
+            const body: ApiPatchUsersUidProfileBody = req.body;
+
+            const updated = await dbQuery<boolean>(async db => {
+                const updateResult = await db.collection(DBCollections.USERS).updateOne({ _id: user._id }, { $set: body });
+                return updateResult.matchedCount > 0;
+            });
+
+            if (!updated) {
+                const err: ApiError = {
+                    message: 'User not found',
+                    code: ApiErrorCode.PROVIDED_ID_NOT_FOUND
+                };
+                res.status(404).send(err);
+                return;
+            }
+
+            res.send();
+        });
+    });
 
 }

@@ -60,4 +60,25 @@ export function route(router: Router): void {
         });
     });
 
+    router.put('/users/:uid/profile/password', auth('uid'), validate(validatePutProfilePassword), purge(purgePutProfilePassword), async (req: Request & ReqAuthenticated, res) => {
+        await aceInTheHole(res, async () => {
+            const user = req.user;
+            const body: ApiPatchUsersUidProfilePassowrdBody = req.body;
+
+            await dbQuery<unknown>(async db => {
+                const queryResult = await db.collection(DBCollections.USERS).updateOne({ _id: user._id }, { $set: { password: body.password } });
+                const updated = queryResult.matchedCount > 0;
+
+                if (!updated) {
+                    throw new Error('User password not updated');
+                }
+            });
+
+            const token = jwt.sign({ username: user.username, password: body.password }, CONFIG.SECURITY.JWT.KEY);
+            const response: ApiPatchUsersUidProfilePassowrdResult = { token };
+
+            res.send(response);
+        });
+    });
+
 }

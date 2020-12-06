@@ -20,6 +20,22 @@ import CONFIG from '@/config';
 
 export function route(router: Router): void {
 
-   
+    router.put('/users/:uid/profile', auth('uid'), validate(validatePutProfile), purge(purgePutProfile), async (req: Request & ReqAuthenticated, res) => {
+        await aceInTheHole(res, async () => {
+            const user = req.user;
+            const body: ApiPutUsersUidProfileBody = req.body;
+
+            await dbQuery<unknown>(async db => {
+                const newUser: Omit<DBUser, '_id'> = { 
+                    ...user,
+                    ...body
+                };
+                await db.collection(DBCollections.USERS).replaceOne({ _id: user._id }, newUser, { upsert: true });
+            });
+
+            res.send();
+        });
+    });
+
 
 }

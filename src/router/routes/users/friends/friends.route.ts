@@ -113,5 +113,17 @@ export function route(router: Router): void {
         });
     });
 
+    router.get('/users/:uid/friends/friend-requests/sent', auth('uid'), async (req: Request & ReqAuthenticated, res) => {
+        await aceInTheHole(res, async () => {
+            const user = req.user;
+            
+            const friendRequests = await dbQuery<DBFriendRequest[]>(async db => {
+                return db.collection(DBCollections.FRIEND_REQUESTS).find({ requestBy: user._id }).toArray();
+            });
+
+            res.send(friendRequests);
+        });
+    });
+
 
 }

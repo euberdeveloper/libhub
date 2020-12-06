@@ -81,4 +81,33 @@ export function route(router: Router): void {
         });
     });
 
+    router.put('/users/:uid/profile/avatar', auth('uid'), upload(CONFIG.UPLOAD.TEMP_LOCATIONS.USERS, 'avatar'), async (req: Request & ReqAuthenticated, res) => {
+        await aceInTheHole(res, async () => {
+            const user = req.user;
+            const uid = user._id as unknown as ObjectID;
+            
+            const result = await dbTransaction<string>(async (db, session) => {
+                const avatarName = `avatar.jpg`;
+                const avatarPath = path.join(CONFIG.UPLOAD.STORED_LOCATIONS.USERS(uid.toHexString()), avatarName);
+
+                const result = `${CONFIG.SERVER.HOSTNAME}/stored/users/${uid.toHexString()}/avatar.jpg`;
+
+                const queryBody = { $set: { avatar: result } };
+                const queryResult = await db.collection(DBCollections.USERS).updateOne({ _id: uid }, queryBody, { session });
+
+                if (queryResult.matchedCount < 1) {
+                    throw new Error('Error in updating user');
+                }
+
+                const tempPath = req.file.path;
+                await mkdir(CONFIG.UPLOAD.STORED_LOCATIONS.USERS(uid.toHexString()), { recursive: true });
+                await rename(tempPath, avatarPath);
+
+                return result;
+            });
+
+            res.send(result);
+        });
+    });
+
 }

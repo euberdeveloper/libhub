@@ -66,5 +66,19 @@ export function route(router: Router): void {
         });
     });
 
+    router.put('/users/:uid/libraries/:lid', auth('uid'), validateDbId('lid'), validate(validatePostOrPutLibraries), purge(purgePutLibraries), async (req: Request & ReqAuthenticated & ReqIdParams, res) => {
+        await aceInTheHole(res, async () => {
+            const user = req.user;
+            const lid = req.idParams.lid;
+            const body: ApiPutLibrariesLidBody = req.body;
+
+            await dbQuery<unknown>(async db => {
+                const oldLibrary: DBLibraryDocument = await db.collection(DBCollections.LIBRARIES).findOne({ _id: lid, owners: user._id });
+                await db.collection(DBCollections.LIBRARIES).replaceOne({ _id: lid, owners: user._id }, { ...body, owners: oldLibrary.owners, schema: oldLibrary.schema }, { upsert: true });
+            });
+
+            res.send();
+        });
+    });
 
 }

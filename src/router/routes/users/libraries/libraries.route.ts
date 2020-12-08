@@ -28,6 +28,28 @@ export function route(router: Router): void {
         });
     });
 
+    router.get('/users/:uid/libraries/:lid', auth('uid'), validateDbId('lid'), async (req: Request & ReqAuthenticated & ReqIdParams, res) => {
+        await aceInTheHole(res, async () => {
+            const user = req.user;
+            const lid = req.idParams.lid;
+            const library = await dbQuery<ApiGetLibrariesLid>(async db => {
+                return db.collection(DBCollections.LIBRARIES).findOne({ _id: lid, owners: user._id });
+            });
+
+            if (!library) {
+                const err: ApiError = {
+                    message: 'Library not found',
+                    code: ApiErrorCode.PROVIDED_ID_NOT_FOUND
+                };
+                res.status(404).send(err);
+                return;
+            }
+
+            res.send(library);
+        });
+    });
+
+    
 
 
 }

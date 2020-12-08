@@ -116,5 +116,37 @@ export function route(router: Router): void {
         });
     });
 
+    router.post('/users/:uid/chats', auth('uid'), validate(validateCreateChat), purge(purgeCreateChat), async (req: Request & ReqAuthenticated, res) => {
+        await aceInTheHole(res, async () => {
+            const user = req.user;
+            const body: ApiPostUsersUidChatsBody = req.body;
+
+            const exists = await dbQuery<boolean>(async db => {
+                const chatsCount = await db.collection(DBCollections.CHATS).countDocuments({ $and: [ { users: user._id }, { users: dbId(body.recipient) } ] });
+                return chatsCount > 0;
+            });
+            if (exists) {
+                const error: ApiError = {
+                    message: 'Chat already exists',
+                    code: ApiErrorCode.CHAT_ALREADY_EXISTS
+                };
+                res.status(400).send(error);
+                return;
+            }
+
+            const id = await dbQuery<string>(async db => {
+                const otherUser: any = dbId(body.recipient);
+                const chat: Omit<DBChat, '_id'> = {
+                    users: [user._id, otherUser],
+                    createdOn: new Date()
+                };
+
+                const queryResult = await db.collection(DBCollections.CHATS).insertOne(chat);
+                return queryResult.insertedId;
+            });
+
+            res.send(id);
+        });
+    });
 
 }

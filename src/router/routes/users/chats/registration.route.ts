@@ -15,7 +15,22 @@ import { DBChat, DBChatMessage } from '@/types/database/chat';
 
 export function route(router: Router): void {
 
-    
+    router.get('/users/:uid/chats', auth('uid'), async (req: Request & ReqAuthenticated, res) => {
+        await aceInTheHole(res, async () => {
+            const user = req.user;
+
+            const chats = await dbQuery<ApiGetUsersUidChatsResult>(async db => {
+                const chats = await db.collection(DBCollections.CHATS).find({ users: user._id }).toArray();
+                for (const chat of chats) {
+                    const newMessages = await db.collection(DBCollections.CHAT_MESSAGES).countDocuments({ _id: chat._id, author: { $ne: user._id }, visualized: false });
+                    chat.newMessages = newMessages;
+                }
+                return chats;
+            });
+
+            res.send(chats);
+        });
+    });
 
     
 

@@ -149,4 +149,37 @@ export function route(router: Router): void {
             res.send();
         });
     });
+
+    router.put('/users/:uid/libraries/:lid/co-own/:fid', auth('uid'), validateDbId(['lid', 'uid', 'fid']), async (req: Request & ReqAuthenticated & ReqIdParams, res) => {
+        await aceInTheHole(res, async () => {
+            const { uid, lid, fid } = req.idParams;
+
+            const friendExists = await dbQuery<boolean>(async db => {
+                const friendCount = await db.collection(DBCollections.USERS).countDocuments({ _id: fid });
+                return friendCount > 0;
+            });
+            if (!friendExists) {
+                const err: ApiError = {
+                    message: 'Friend does not exist',
+                    code: ApiErrorCode.FRIEND_DOES_NOT_EXIST
+                };
+                res.status(404).send(err);
+                return;
+            }
+
+            const updated = await dbQuery<boolean>(async db => {
+                const updateResult = await db.collection(DBCollections.LIBRARIES).updateOne({ _id: lid, owners: uid }, { $addToSet: { owners: fid } });
+                return updateResult.matchedCount > 0;
+            });
+            if (!updated) {
+                const err: ApiError = {
+                    message: 'Library not found',
+                    code: ApiErrorCode.PROVIDED_ID_NOT_FOUND
+                };
+                res.status(404).send(err);
+            }
+
+            res.send();
+        });
+    });
 }

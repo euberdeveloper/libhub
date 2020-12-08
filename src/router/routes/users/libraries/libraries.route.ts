@@ -18,5 +18,16 @@ import { purgePatchLibraries, purgePostLibraries, purgePutLibraries, validatePat
 
 export function route(router: Router): void {
 
-   
+    router.get('/users/:uid/libraries', auth('uid'), async (req: Request & ReqAuthenticated, res) => {
+        await aceInTheHole(res, async () => {
+            const user = req.user;
+            const libraries = await dbQuery<ApiGetLibraries>(async db => {
+                return db.collection(DBCollections.LIBRARIES).find({ owners: user._id }).toArray();
+            });
+            res.send(libraries);
+        });
+    });
+
+
+
 }

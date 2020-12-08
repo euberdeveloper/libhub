@@ -55,6 +55,40 @@ export function route(router: Router): void {
         });
     });
 
+    router.post('/users/:uid/chats/:cid', auth('uid'), validateDbId('cid'), validate(validateCreateMessage), purge(purgeCreateMessage), async (req: Request & ReqAuthenticated & ReqIdParams, res) => {
+        await aceInTheHole(res, async () => {
+            const user = req.user;
+            const body: ApiPostUsersUidChatsCidBody = req.body;
+            const cid = req.idParams.cid;
+
+            const chat = await dbQuery<DBChat>(async db => {
+                return db.collection(DBCollections.CHATS).findOne({ _id: cid, users: user._id });
+            });
+
+            if (!chat) {
+                const error: ApiError = {
+                    message: 'Provided id not found',
+                    code: ApiErrorCode.PROVIDED_ID_NOT_FOUND
+                };
+                res.status(404).send(error);
+                return;
+            }
+
+            await dbQuery(async db => {
+                const message: Omit<DBChatMessage, '_id'> = {
+                    author: user._id,
+                    chatId: cid as any,
+                    date: new Date(),
+                    text: body.text,
+                    visualized: false
+                };
+
+                await db.collection(DBCollections.CHAT_MESSAGES).insertOne(message);
+            });
+
+            res.send(chat);
+        });
+    });
 
 
 

@@ -49,7 +49,22 @@ export function route(router: Router): void {
         });
     });
 
-    
+    router.post('/users/:uid/libraries', auth('uid'), validate(validatePostOrPutLibraries), purge(purgePostLibraries), async (req: Request & ReqAuthenticated, res) => {
+        await aceInTheHole(res, async () => {
+            const user = req.user;
+            const body: ApiPostLibrariesBody = req.body;
+            const lid = await dbQuery<ApiPostLibrariesResult>(async db => {
+                const queryResult = await db.collection(DBCollections.LIBRARIES).insertOne({ ...body, owners: [user._id] });
+                return queryResult?.insertedId?.toHexString();
+            });
+
+            if (!lid) {
+                throw new Error('Error in database insert');
+            }
+            
+            res.send(lid);
+        });
+    });
 
 
 }

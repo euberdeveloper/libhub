@@ -32,7 +32,28 @@ export function route(router: Router): void {
         });
     });
 
-    
+    router.get('/users/:uid/chats/:cid', auth('uid'), validateDbId('cid'), async (req: Request & ReqAuthenticated & ReqIdParams, res) => {
+        await aceInTheHole(res, async () => {
+            const user = req.user;
+            const cid = req.idParams.cid;
+
+            const chat = await dbQuery<ApiGetUsersUidChatsCidResult>(async db => {
+                const chat: DBChat = await db.collection(DBCollections.CHATS).findOne({ _id: cid, users: user._id });
+                if (!chat) {
+                    throw new Error('Chat not found');
+                }
+
+                const messages: DBChatMessage[] = await db.collection(DBCollections.CHAT_MESSAGES).find({ chatId: cid }).toArray();
+
+                return {
+                    ...chat,
+                    messages: messages
+                };
+            });
+
+            res.send(chat);
+        });
+    });
 
 
 

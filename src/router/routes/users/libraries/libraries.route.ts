@@ -105,4 +105,48 @@ export function route(router: Router): void {
         });
     });
 
+    router.delete('/users/:uid/libraries/:lid', auth('uid'), validateDbId('lid'), async (req: Request & ReqAuthenticated & ReqIdParams, res) => {
+        await aceInTheHole(res, async () => {
+            const user = req.user;
+            const lid = req.idParams.lid;
+            
+            await dbTransaction<unknown>(async (db, session) => {
+                const queryResult = await db.collection(DBCollections.LIBRARIES).findOneAndDelete({ _id: lid, owners: user._id }, { session });
+                const library: DBLibraryDocument = queryResult.value;
+                const deleted = !!library;
+
+                if (deleted) {
+                    for (const resource of library.schema.resources) {
+                        try {
+                            const resourcePath = path.join(CONFIG.UPLOAD.STORED_LOCATIONS.LIBRARIES_SCHEMA(lid.toHexString()), resource);
+                            if (await exists(resourcePath)) {
+                                await unlink(resourcePath);
+                            }
+                        }
+                        catch (error) { }
+                    }
+                    
+                    const books: DBBookDocument[] = await db.collection(DBCollections.BOOKS).find({ libraryId: lid }, { session }).toArray();
+                    await db.collection(DBCollections.BOOKS).deleteMany({ libraryId: lid }, { session });
+                    
+                    for (const book of books) {
+
+                        for (const picture of book.pictures) {
+                            try {
+                                const picturePath = path.join(CONFIG.UPLOAD.STORED_LOCATIONS.LIBRARIES_BOOKS(lid.toHexString(), book._id), picture);
+                                if (await exists(picturePath)) {
+                                    await unlink(picturePath);
+                                }
+                            }
+                            catch (error) { }
+                        }
+                    }
+
+                    await db.collection(DBCollections.LABELS).deleteMany({ libraryId: lid }, { session });
+                }
+            });
+
+            res.send();
+        });
+    });
 }

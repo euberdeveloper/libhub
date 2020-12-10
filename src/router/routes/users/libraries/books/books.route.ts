@@ -224,5 +224,79 @@ export function route(router: Router): void {
         });
     });
 
+    router.delete('/users/:uid/libraries/:lid/books/:bid', auth('uid'), validateDbId(['lid', 'bid']), async (req: Request & ReqAuthenticated & ReqIdParams, res) => {
+        await aceInTheHole(res, async () => {
+            const user = req.user;
+            const { lid, bid } = req.idParams;
 
+            const found = await dbQuery<boolean>(async db => {
+                const library = await db.collection(DBCollections.LIBRARIES).countDocuments({ _id: lid, owners: [user._id]});
+                const book = await db.collection(DBCollections.BOOKS).countDocuments({ _id: bid, libraryId: lid.toHexString() });
+                return book > 0 && library > 0;
+            });
+            if (!found) {
+                const err: ApiError = {
+                    message: 'Book or library not found',
+                    code: ApiErrorCode.PROVIDED_ID_NOT_FOUND
+                };
+                res.status(404).send(err);
+                return;
+            }
+
+            await dbTransaction<unknown>(async (db, session) => {
+                const queryResult = await db.collection(DBCollections.BOOKS).findOneAndDelete({ _id: bid, libraryId: lid.toHexString() }, { session });
+                const book: DBBookDocument = queryResult.value;
+
+                if (!book) {
+                    throw new Error('Error in deleting book');
+                }
+
+                for (const pictureName of book.pictures) {
+                    const picturePath = path.join(CONFIG.UPLOAD.STORED_LOCATIONS.LIBRARIES_BOOKS(lid.toHexString(), bid.toHexString()), pictureName);
+                    if (await exists(picturePath)) {
+                        await unlink(picturePath);
+                    }
+                }
+
+
+            });
+
+            res.send();
+        });
+    });
+
+    router.delete('/users/:uid/libraries/:lid/books/:bid/pictures/:picture', auth('uid'), validateDbId(['lid', 'bid']), async (req: Request & ReqAuthenticated & ReqIdParams, res) => {
+        await aceInTheHole(res, async () => {
+            const user = req.user;
+            const { lid, bid } = req.idParams;
+            const picture = req.params.picture;
+
+            const found = await dbQuery<boolean>(async db => {
+                const library = await db.collection(DBCollections.LIBRARIES).countDocuments({ _id: bid, owners: [user._id]});
+                const book = await db.collection(DBCollections.BOOKS).countDocuments({ _id: bid, libraryId: lid.toHexString() });
+                return book > 0 && library > 0;
+            });
+
+            if (!found) {
+                const err: ApiError = {
+                    message: 'Book or library not found',
+                    code: ApiErrorCode.PROVIDED_ID_NOT_FOUND
+                };
+                res.status(404).send(err);
+                return;
+            }
+
+            await dbTransaction<unknown>(async (db, session) => {
+                const queryResult = await db.collection(DBCollections.BOOKS).updateOne({ _id: bid, libraryId: lid.toHexString() }, { $pull: { pictures: picture } }, { session });
+                if (queryResult.modifiedCount < 1) {
+                    throw new Error('Error in updating book');
+                }
+
+                const picturePath = path.join(CONFIG.UPLOAD.STORED_LOCATIONS.LIBRARIES_BOOKS(lid.toHexString(), bid.toHexString()), picture);
+                await unlink(picturePath);
+            });
+
+            res.send();
+        });
+    });
 }

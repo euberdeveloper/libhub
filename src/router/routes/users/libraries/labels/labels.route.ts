@@ -284,4 +284,40 @@ export function route(router: Router): void {
             res.send();
         });
     });
+
+    router.delete('/user/:uid/libraries/:lid/labels/:id', auth('uid'), validateDbId('lid'), async (req: Request & ReqIdParams & ReqAuthenticated & ReqIdParams, res) => {
+        await aceInTheHole(res, async () => {
+            const user = req.user;
+            const { lid, id } = req.idParams;
+
+            const found = await dbQuery<boolean>(async db => {
+                const library = await db.collection(DBCollections.LIBRARIES).countDocuments({ _id: lid, owners: user._id });
+                return library > 0;
+            });
+            if (!found) {
+                const err: ApiError = {
+                    message: 'Library not found',
+                    code: ApiErrorCode.PROVIDED_ID_NOT_FOUND
+                };
+                res.status(404).send(err);
+                return;
+            }
+
+            const deleted = await dbTransaction<boolean>(async (db, session) => {
+                const queryResult = await db.collection(DBCollections.LABELS).deleteOne({ _id: id, libraryId: lid }, { session });
+                return queryResult.deletedCount > 0;
+            });
+
+            if (!deleted) {
+                const err: ApiError = {
+                    message: 'Label not found',
+                    code: ApiErrorCode.PROVIDED_ID_NOT_FOUND
+                };
+                res.status(404).send(err);
+                return;
+            }
+
+            res.send();
+        });
+    });
 }

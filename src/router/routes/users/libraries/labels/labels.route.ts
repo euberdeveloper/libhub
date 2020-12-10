@@ -74,5 +74,66 @@ export function route(router: Router): void {
         });
     });
 
+    router.post('/user/:uid/libraries/:lid/labels', auth('uid'), validate(validatePostOrPutLabels), purge(purgePostLabels), async (req: Request & ReqAuthenticated & ReqIdParams, res) => {
+        await aceInTheHole(res, async () => {
+            const user = req.user;
+            const lid = req.idParams.lid;
+            const body: ApiPostLabelsBody = req.body;
+            
+            const found = await dbQuery<boolean>(async db => {
+                const library = await db.collection(DBCollections.LIBRARIES).countDocuments({ _id: lid, owners: user._id });
+                return library > 0;
+            });
+            if (!found) {
+                const err: ApiError = {
+                    message: 'Library not found',
+                    code: ApiErrorCode.PROVIDED_ID_NOT_FOUND
+                };
+                res.status(404).send(err);
+                return;
+            }
+
+            const id = await dbQuery<ApiPostLabelsResult>(async db => {
+                const queryResult = await db.collection(DBCollections.LABELS).insertOne({...body, libraryId: lid});
+                return queryResult?.insertedId?.toHexString();
+            });
+
+            if (!id) {
+                throw new Error('Error in database insert');
+            }
+
+            res.send(id);
+        });
+    });
+
+    router.put('/user/:uid/libraries/:lid/labels/:id', auth('uid'), validateDbId('lid'), validate(validatePostOrPutLabels), purge(purgePutLabels), async (req: Request & ReqIdParams & ReqAuthenticated & ReqIdParams, res) => {
+        await aceInTheHole(res, async () => {
+            const user = req.user;
+            const { lid, id } = req.idParams;
+            const body: ApiPutLabelsLidBody = req.body;
+
+            const found = await dbQuery<boolean>(async db => {
+                const library = await db.collection(DBCollections.LIBRARIES).countDocuments({ _id: lid, owners: user._id });
+                return library > 0;
+            });
+            if (!found) {
+                const err: ApiError = {
+                    message: 'Library not found',
+                    code: ApiErrorCode.PROVIDED_ID_NOT_FOUND
+                };
+                res.status(404).send(err);
+                return;
+            }
+
+            await dbQuery<unknown>(async db => {
+                const oldLabel: DBLabelDocument = await db.collection(DBCollections.LABELS).findOne({ _id: id, libraryId: lid });
+                const newLabel = { ...body, children: oldLabel.children ?? [], parent: oldLabel.parent ?? null };
+                await db.collection(DBCollections.LABELS).replaceOne({ _id: id, libraryId: lid }, newLabel, { upsert: true });
+            });
+
+            res.send();
+        });
+    });
+
 
 }

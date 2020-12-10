@@ -158,6 +158,34 @@ export function route(router: Router): void {
         });
     });
     
-    
+    router.put('/users/:uid/libraries/:lid/books/:bid', auth('uid'), validateDbId(['lid', 'bid']), deserializeDates(['publicationYear']), validate(validatePostOrPutBooks), purge(purgePutBooks), async (req: Request & ReqAuthenticated & ReqIdParams, res) => {
+        await aceInTheHole(res, async () => {
+            const user = req.user;
+            const { lid, bid } = req.idParams;
+            const body: ApiPutLibrariesLidBooksBidBody = req.body;
+
+            const found = await dbQuery<boolean>(async db => {
+                const library = await db.collection(DBCollections.LIBRARIES).countDocuments({ _id: lid, owners: user._id });
+                return library > 0;
+            });
+            if (!found) {
+                const err: ApiError = {
+                    message: 'Library not found',
+                    code: ApiErrorCode.PROVIDED_ID_NOT_FOUND
+                };
+                res.status(404).send(err);
+                return;
+            }
+
+            await dbQuery<unknown>(async db => {
+                const oldBook: DBBookDocument | null = await db.collection(DBCollections.BOOKS).findOne({ _id: bid, libraryId: lid.toHexString() });
+                const newBook: Omit<DBBookDocument, '_id'> = { ...body, libraryId: lid.toHexString(), pictures: oldBook ? oldBook.pictures : [], reviews: oldBook.reviews };
+                await db.collection(DBCollections.BOOKS).replaceOne({ _id: bid, libraryId: lid.toHexString() }, newBook, { upsert: true });
+            });
+
+            res.send();
+        });
+    });
+
 
 }

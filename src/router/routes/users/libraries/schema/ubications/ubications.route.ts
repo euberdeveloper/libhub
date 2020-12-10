@@ -36,5 +36,55 @@ export function route(router: Router): void {
             res.send(ubications);
         });
     });
+
+    router.post('/users/:uid/libraries/:lid/schema/ubications', auth('uid'), validateDbId('lid'), validate(validatePostUbications), purge(purgePostUbications), async (req: Request & ReqAuthenticated & ReqIdParams, res) => {
+        await aceInTheHole(res, async () => {
+            const user = req.user;
+            const lid = req.idParams.lid;
+            const body: ApiPostLibrariesLidSchemaUbicationsBody = req.body;
+
+            const updated = await dbQuery<boolean>(async db => {
+                const queryBody = { $addToSet: { 'schema.ubications': body.ubication } };
+                const queryResult = await db.collection(DBCollections.LIBRARIES).updateOne({ _id: lid, owners: user._id }, queryBody);
+                return queryResult.matchedCount > 0;
+            });
+
+            if (!updated) {
+                const err: ApiError = {
+                    message: 'Library not found',
+                    code: ApiErrorCode.PROVIDED_ID_NOT_FOUND
+                };
+                res.status(404).send(err);
+                return;
+            }
+
+            res.send();
+        });
+    });
+
+    router.delete('/users/:uid/libraries/:lid/schema/ubications/:ubication', auth('uid'), validateDbId('lid'), async (req: Request & ReqAuthenticated & ReqIdParams, res) => {
+        await aceInTheHole(res, async () => {
+            const user = req.user;
+            const lid = req.idParams.lid;
+            const ubication = req.params.ubication;
+
+            const deleted = await dbQuery<boolean>(async db => {
+                const queryBody = { $pull: { 'schema.ubications': ubication } };
+                const queryResult = await db.collection(DBCollections.LIBRARIES).updateOne({ _id: lid, owners: user._id }, queryBody);
+                return queryResult.matchedCount > 0;
+            });
+
+            if (!deleted) {
+                const err: ApiError = {
+                    message: 'Library not found',
+                    code: ApiErrorCode.PROVIDED_ID_NOT_FOUND
+                };
+                res.status(404).send(err);
+                return;
+            }
+
+            res.send();
+        });
+    });
  
 }

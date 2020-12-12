@@ -77,5 +77,51 @@ export function route(router: Router): void {
         });
     });
 
+    router.post('/users/:uid/libraries/:lid/books/:bid/reviews', auth('uid'), validateDbId(['uid', 'lid', 'bid']), validate(validateCreateReview), purge(purgeCreateReview), async (req: Request & ReqAuthenticated & ReqIdParams, res) => {
+        await aceInTheHole(res, async () => {
+            const user = req.user;
+            const {uid, lid, bid} = req.idParams;
+            const body: ApiPostUsersUidLibrariesLidBooksBidReviewsBody = req.body;
+
+            const found = await dbQuery<boolean>(async db => {
+                const library = await db.collection(DBCollections.LIBRARIES).countDocuments({ _id: lid, owners: user._id });
+                const book = await db.collection(DBCollections.BOOKS).countDocuments({ _id: bid, libraryId: lid });
+                return library > 0 && book > 0;
+            });
+            if (!found) {
+                const err: ApiError = {
+                    message: 'Library or book not found',
+                    code: ApiErrorCode.PROVIDED_ID_NOT_FOUND
+                };
+                res.status(404).send(err);
+                return;
+            }
+
+            const id = await dbTransaction<ApiPostUsersUidLibrariesLidBooksBidReviewsResult>(async (db, session) => {
+                const review: Omit<DBBookReview, '_id'> = {
+                    ...body,
+                    bookId: bid as any,
+                    author: uid as any
+                };
+                const queryResult = await db.collection(DBCollections.BOOK_REVIEWS).insertOne(review, { session });
+                const id = queryResult.insertedId;
+
+                if (!id) {
+                    throw new Error('Error in inserting review');
+                }
+
+                const updateResult = await db.collection(DBCollections.BOOK_REVIEWS).updateOne({ _id: bid, libraryId: lid }, { $inc: { nOfReviews: 1, totalRating: body.rate } }, { session });
+                if (updateResult.modifiedCount < 1) {
+                    throw new Error('Error in updating book');
+                }
+
+                return id;
+            });
+            
+
+            res.send(id);
+        });
+    });
+
 
 }

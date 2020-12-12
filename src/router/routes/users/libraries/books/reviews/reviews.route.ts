@@ -123,5 +123,51 @@ export function route(router: Router): void {
         });
     });
 
+    router.delete('/users/:uid/libraries/:lid/books/:bid/reviews/:rid', auth('uid'), validateDbId(['lid', 'bid', 'rid']), async (req: Request & ReqAuthenticated & ReqIdParams, res) => {
+        await aceInTheHole(res, async () => {
+            const user = req.user;
+            const {lid, bid, rid} = req.idParams;
+
+            const found = await dbQuery<boolean>(async db => {
+                const library = await db.collection(DBCollections.LIBRARIES).countDocuments({ _id: lid, owners: user._id });
+                const book = await db.collection(DBCollections.BOOKS).countDocuments({ _id: bid, libraryId: lid });
+                return library > 0 && book > 0;
+            });
+            if (!found) {
+                const err: ApiError = {
+                    message: 'Library or book not found',
+                    code: ApiErrorCode.PROVIDED_ID_NOT_FOUND
+                };
+                res.status(404).send(err);
+                return;
+            }
+
+            const deleted = await dbTransaction<boolean>(async (db, session) => {
+                const deleteResult = await db.collection(DBCollections.BOOK_REVIEWS).findOneAndDelete({ _id: rid, bookId: bid }, { session });
+                const review: DBBookReview = deleteResult.value;
+
+                if (!review) {
+                    return false;
+                }
+                
+                const updateResult = await db.collection(DBCollections.BOOKS).updateOne({ _id: bid, libraryId: lid }, { $inc: { nOfReviews: -1, totalRating: -review.rate } }, { session });
+                if (updateResult.modifiedCount < 1) {
+                    throw new Error('Error in updating book');
+                }
+
+                return true;
+            });
+            if (!deleted) {
+                const err: ApiError = {
+                    message: 'Review not found',
+                    code: ApiErrorCode.PROVIDED_ID_NOT_FOUND
+                };
+                res.status(404).send(err);
+                return;
+            }
+
+            res.send();
+        });
+    });
 
 }

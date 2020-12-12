@@ -1,7 +1,11 @@
-import { DBDocument } from '../..';
+import { DBDocument } from '..';
+
+export interface Reviews {
+    nOfReviews: number;
+    totalRating: number;
+}
 
 export interface DBBookDocument extends DBDocument {
-    _id: string;
     libraryId: string;
     isbn: string | null;
     title: string;
@@ -14,4 +18,5 @@ export interface DBBookDocument extends DBDocument {
     labels: string[];
     pictures: string[];
     notes: string | null;
+    reviews: Reviews;
 }

@@ -1,10 +1,10 @@
-import { DBDocument } from '../..';
+import { DBDocument } from '..';
 
 export interface DBLabelDocument extends DBDocument {
-    _id: string;
+    libraryId: string;
     name: string;
     description: string | null;
-    colour: string | null;
+    color: string | null;
     children: string[];
     parent: string | null;
 }

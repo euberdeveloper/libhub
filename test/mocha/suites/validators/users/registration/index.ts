@@ -30,6 +30,16 @@ export default async function () {
             expect(wrong).to.be.false;
         });
 
+        it('Should check the validateLogin function accepts', async function () {
+            const bodyOk = {
+                username: 'username',
+                password: 'CiaoComeVa1!?'
+            }
+            const ok = validateLogin(bodyOk);
+            expect(ok).to.be.true;
+        });
+
+
     });
 
 }

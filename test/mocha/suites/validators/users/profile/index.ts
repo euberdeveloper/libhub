@@ -14,7 +14,13 @@ export default async function () {
             expect(ok).to.be.true;
         });
 
-  
+        it('Should check the validatePatchProfile function refuses', async function () {
+            const bodyWrong = {
+                name: 23
+            }
+            const wrong = validatePatchProfile(bodyWrong);
+            expect(wrong).to.be.false;
+        });
 
     });
 

@@ -14,6 +14,14 @@ export default async function () {
             expect(ok).to.be.true;
         });
 
+        it('Should check the validateRecovery function refuses', async function () {
+            const bodyWrong = {
+                password: 'ciao'
+            }
+            const wrong = validateRecovery(bodyWrong);
+            expect(wrong).to.be.false;
+        });
+
     });
 
 }

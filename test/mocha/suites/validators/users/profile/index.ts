@@ -31,6 +31,14 @@ export default async function () {
             expect(ok).to.be.true;
         });
 
+        it('Should check the validatePutProfile function refuses', async function () {
+            const bodyWrong = {
+                name: 'X3no'
+            }
+            const wrong = validatePutProfile(bodyWrong);
+            expect(wrong).to.be.false;
+        });
+
 
     });
 

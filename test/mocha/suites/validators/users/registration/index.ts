@@ -18,6 +18,18 @@ export default async function () {
             expect(ok).to.be.true;
         });
 
+        it('Should check the validateSignup function refuses', async function () {
+            const bodyWrong = {
+                username: 'username',
+                password: 'easy',
+                name: 'Eugenio',
+                surname: 'Berretta',
+                email: 'email@email.com'
+            }
+            const wrong = validateSignup(bodyWrong);
+            expect(wrong).to.be.false;
+        });
+
     });
 
 }

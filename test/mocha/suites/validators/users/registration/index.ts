@@ -39,6 +39,14 @@ export default async function () {
             expect(ok).to.be.true;
         });
 
+        it('Should check the validateLogin function refuses', async function () {
+            const bodyWrong = {
+                username: 'username',
+                password: 'easy'
+            }
+            const wrong = validateLogin(bodyWrong);
+            expect(wrong).to.be.false;
+        });
 
     });
 

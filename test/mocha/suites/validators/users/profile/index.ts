@@ -22,6 +22,16 @@ export default async function () {
             expect(wrong).to.be.false;
         });
 
+        it('Should check the validatePutProfile function accepts', async function () {
+            const bodyOk = {
+                name: 'Federico',
+                surname: 'Stefini'
+            }
+            const ok = validatePutProfile(bodyOk);
+            expect(ok).to.be.true;
+        });
+
+
     });
 
 }

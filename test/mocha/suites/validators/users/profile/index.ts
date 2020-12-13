@@ -39,6 +39,14 @@ export default async function () {
             expect(wrong).to.be.false;
         });
 
+        it('Should check the validatePutProfilePassword function accepts', async function () {
+            const bodyOk = {
+                password: 'CiaoCOme1!?'
+            }
+            const ok = validatePutProfilePassword(bodyOk);
+            expect(ok).to.be.true;
+        });
+
 
     });
 

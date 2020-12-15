@@ -118,8 +118,9 @@ export function route(router: Router): void {
         await aceInTheHole(res, async () => {
             const user = req.user;
             const { lid, bid } = req.idParams;
+
             const found = await dbQuery<boolean>(async db => {
-                const library = await db.collection(DBCollections.LIBRARIES).countDocuments({ _id: lid, owners: [user._id]});
+                const library = await db.collection(DBCollections.LIBRARIES).countDocuments({ _id: lid, owners: user._id});
                 const book = await db.collection(DBCollections.BOOKS).countDocuments({ _id: bid, libraryId: lid.toHexString() });
                 return book > 0 && library > 0;
             });

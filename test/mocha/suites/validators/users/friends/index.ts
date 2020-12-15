@@ -29,6 +29,14 @@ export default async function () {
             expect(ok).to.be.true;
         });
 
+        it('Should check the validateFriendRequestResponse function refuses', async function () {
+            const bodyWrong = {
+                
+            }
+            const wrong = validateFriendRequestResponse(bodyWrong);
+            expect(wrong).to.be.false;
+        });
+
     });
 
 }

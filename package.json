@@ -1,19 +1,21 @@
 {
   "name": "libhub",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "transpile": "tsc",
-    "start": "node dist/main",
+    "transpile": "shx rm -rf ./dist && tsc && shx cp -r ./test/mocha/suites/fs-async/assets ./dist/test/mocha/suites/fs-async/assets",
+    "start": "node dist/src/main",
     "serve": "npm run transpile && npm run start",
     "lint": "eslint src/**/*.ts --format codeframe",
     "lint:fix": "eslint src/**/*.ts --format codeframe --fix",
     "postinstall": "npm run transpile",
+    "test:mocha": "mocha ./dist/test/mocha/index.js --reporter spec",
     "test:postman": "newman run test/postman/LibHub.postman_collection.json -e test/postman/LibHub.postman_environment.json",
+    "docs": "typedoc --mode modules --name 'LibHub - API' --includeVersion --out docs/documentation/html",
     "commit": "git-cz"
   },
-  "author": "",
+  "author": "Eugenio Berretta",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.0.0",
@@ -71,6 +73,6 @@
     }
   },
   "_moduleAliases": {
-    "@": "dist"
+    "@": "dist/src"
   }
 }

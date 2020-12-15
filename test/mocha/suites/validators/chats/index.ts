@@ -13,6 +13,15 @@ export default async function () {
             const ok = validateCreateChat(bodyOk);
             expect(ok).to.be.true;
         });
+
+        it('Should check the validateCreateChat function refuses', async function () {
+            const bodyWrong = {
+                recipient: null
+            }
+            const wrong = validateCreateChat(bodyWrong);
+            expect(wrong).to.be.false;
+        });
+
     });
 
 }

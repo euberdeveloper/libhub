@@ -15,7 +15,7 @@
     "docs": "typedoc --mode modules --name 'LibHub - API' --includeVersion --out docs/documentation/html",
     "commit": "git-cz"
   },
-  "author": "Eugenio Berretta",
+  "author": "",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.0.0",

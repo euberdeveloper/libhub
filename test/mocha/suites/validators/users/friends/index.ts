@@ -20,6 +20,14 @@ export default async function () {
             expect(wrong).to.be.false;
         });
 
+        it('Should check the validateFriendRequestResponse function accepts', async function () {
+            const bodyOk = {
+                accepted: true,
+                message: "asfds"
+            }
+            const ok = validateFriendRequestResponse(bodyOk);
+            expect(ok).to.be.true;
+        });
 
     });
 

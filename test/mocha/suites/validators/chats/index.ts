@@ -30,6 +30,14 @@ export default async function () {
             expect(ok).to.be.true;
         });
 
+        it('Should check the validateCreateMessage function refuses', async function () {   
+            const bodyWrong = {
+                text: null
+            }
+            const wrong = validateCreateMessage(bodyWrong);
+            expect(wrong).to.be.false;
+        });
+
     });
 
 }

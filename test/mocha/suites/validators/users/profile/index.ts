@@ -47,6 +47,13 @@ export default async function () {
             expect(ok).to.be.true;
         });
 
+        it('Should check the validatePutProfilePassword function refuses', async function () {
+            const bodyWrong = {
+                password: 'diocan'
+            }
+            const wrong = validatePutProfilePassword(bodyWrong);
+            expect(wrong).to.be.false;
+        });
 
     });
 

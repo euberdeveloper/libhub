@@ -43,6 +43,7 @@ export default async function () {
             const exists = await fsAsync.exists(path.join(__dirname, 'assets', 'directory'));
             expect(exists).to.be.true;
         });
+
         
 
     });

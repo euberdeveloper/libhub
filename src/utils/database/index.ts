@@ -3,6 +3,11 @@ import CONFIG from '@/config';
 
 export { ObjectID } from 'mongodb';
 
+/**
+ * Executes a db query, automitizing the connection to the db and passing the db as parameter of a callback
+ * @param callback A callback with the db already taken
+ * @returns A promise to the result of the callback
+ */
 export async function dbQuery<ResultType>(callback: (db: Db) => Promise<ResultType>): Promise<ResultType> {
     const connection = await MongoClient.connect(CONFIG.MONGO.URI, CONFIG.MONGO.OPTIONS);
     const db = connection.db(CONFIG.MONGO.DB);
@@ -28,6 +33,11 @@ export async function dbQuery<ResultType>(callback: (db: Db) => Promise<ResultTy
     }
 }
 
+/**
+ * Executes a db transaction, automitizing the connection to the db and passing the db and the transaction session as parameters of a callback
+ * @param callback A callback with the db already taken
+ * @returns A promise to the result of the callback
+ */
 export async function dbTransaction<ResultType>(callback: (db: Db, session: ClientSession) => Promise<ResultType>): Promise<ResultType> {
     const connection = await MongoClient.connect(CONFIG.MONGO.URI, CONFIG.MONGO.OPTIONS);
     const db = connection.db(CONFIG.MONGO.DB);
@@ -36,7 +46,7 @@ export async function dbTransaction<ResultType>(callback: (db: Db, session: Clie
     const transactionOptions: TransactionOptions = {
         readPreference: 'primary',
         readConcern: { level: 'local' },
-        writeConcern: { w: 'majority' },
+        writeConcern: { w: 'majority' }
     };
 
     let result: ResultType | null = null;
@@ -63,6 +73,11 @@ export async function dbTransaction<ResultType>(callback: (db: Db, session: Clie
     }
 }
 
+/**
+ * Transforms a string to an ObjectID
+ * @param _id The id to transform
+ * @returns The objectID
+ */
 export function dbId(_id: string): ObjectID {
     return new ObjectID(_id);
 }

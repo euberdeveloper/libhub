@@ -1,6 +1,11 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { ApiError, ApiErrorCode } from '@/types/api';
 
+/**
+ * A middleware that purges the ody
+ * @param purger The functions that purges the body
+ * @param message A customizable error message
+ */
 export function purge(purger: (body: any, req: Request) => any, message: string = 'Internal server error during body parsing'): RequestHandler {
     return (req: Request, res: Response, next: NextFunction) => {
         try {

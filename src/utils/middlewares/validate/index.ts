@@ -2,6 +2,11 @@ import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { ApiError, ApiErrorCode } from '@/types/api';
 import { dbId } from '@/utils/database';
 
+/**
+ * A middleware that validates the body
+ * @param validator The validator function
+ * @param message A custom error message
+ */
 export function validate(validator: (body: any) => boolean, message: string = 'Invalid body'): RequestHandler {
     return (req: Request, res: Response, next: NextFunction) => {
         const body = req.body;
@@ -36,6 +41,12 @@ export async function asyncValidate(validator: (body: any) => Promise<boolean>, 
     };
 }
 
+/**
+ * A middleware that validates the ids of the params of the request and transforms them in ObjectID, saved in req.idParams
+ * @param params The params to be validated
+ * @param exonerate The params to exonerate
+ * @param message A customizable error message
+ */
 export function validateDbId(params: string | string[], exonerate: string | string[] = [], message: string = 'Invalid id parameter'): RequestHandler {
     if (typeof params === 'string') {
         params = [params];

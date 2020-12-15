@@ -1,5 +1,8 @@
 import { Scratcher } from '../..';
 
+/**
+ * A scratcher that gets the isbn
+ */
 export const scratcher: Scratcher = {
     priority: 1,
     async scratch(isbn, page) {

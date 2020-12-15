@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
+/* eslint-disable @typescript-eslint/no-var-requires */
 import { Router } from 'express';
 import { scan } from 'dree';
 import * as path from 'path';

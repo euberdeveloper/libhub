@@ -2,6 +2,9 @@ import * as dree from 'dree';
 import * as path from 'path';
 import { Scratcher } from '..';
 
+/**
+ * Dynamically (as a framework) gets all the .scratcher.ts scrathers in the scratchers directory
+ */
 export default function(): Scratcher[] {
     const scratchers: Scratcher[] = [];
 

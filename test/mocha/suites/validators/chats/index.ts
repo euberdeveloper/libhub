@@ -22,6 +22,14 @@ export default async function () {
             expect(wrong).to.be.false;
         });
 
+        it('Should check the validateCreateMessage function accepts', async function () {
+            const bodyOk = {
+                text: 'ciao'
+            }
+            const ok = validateCreateMessage(bodyOk);
+            expect(ok).to.be.true;
+        });
+
     });
 
 }
